@@ -1,0 +1,22 @@
+=meta: 0.0.2
+
+name: complete-shell
+version: 0.2.1
+abstract: Modern Tab Completion Everywhere
+homepage: http://complete-shell.com
+tag: []
+license: MIT
+copyright: 2019
+
+author:
+  name: Ingy döt Net
+  email: ingy@ingy.net
+  homepage: http://ingy.net
+  github: ingydotnet
+  twitter: ingydotnet
+  freenode: ingy
+
+devel:
+  git: https://github.com/complete-shell/compile-shell
+  bug: https://github.com/complete-shell/compile-shell/issues
+  irc: irc.freenode.net#complete-shell

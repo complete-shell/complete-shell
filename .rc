@@ -1,0 +1,18 @@
+# shellcheck shell=sh disable=1090,2034,2128
+
+if [ -n "${BASH_VERSION-}" ]; then
+  COMPLETE_SHELL_ROOT=$(cd -P "$(dirname "$BASH_SOURCE")" && pwd)
+  . "$COMPLETE_SHELL_ROOT/.bashrc"
+
+elif [ -n "${ZSH_VERSION-}" ]; then
+  COMPLETE_SHELL_ROOT=$(cd -P "$(dirname "$0")" && pwd)
+  . "$COMPLETE_SHELL_ROOT/.zshrc"
+
+else
+  echo "Your shell is not supported by complete-shell/.rc"
+  echo "Check for a complete-shell/.<shell-name>rc file"
+  return 1
+fi
+
+
+# vim: ft=sh:

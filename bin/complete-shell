@@ -1,0 +1,461 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=1090,2034,2154
+
+set -eu -o pipefail
+
+COMPLETE_SHELL_VERSION=0.0.1
+
+IFS=' '$'\t'$'\n'
+
+USAGE="\
+  $(basename "${BASH_SOURCE[0]}") [<options>] <command> <arguments>
+
+Commands:
+
+  help      View full documentation
+  search    Find CompleteShell completion packages
+  list      List installed definitions
+  show      Show information about definition
+  install   Install packages
+  add       Add a local completion definition
+  delete    Delete a completion definition
+  disable   Disable a completion definition
+  enable    Re-enable a disabled definition
+  update    Update packages
+  upgrade   Upgrade complete-shell software
+  alias     Create a completion alias for a command
+  remake    Rebuild all the installed definitions
+
+See 'complete-shell help' for complete help.
+
+Options:
+--
+t,to=       Compiler target shell (bash, zsh, fish)
+o,outdir=   Compiler output directory
+p,print     Compiler output to stdout
+a,all       Apply command to all packages or info
+s,symlink   Add a compdef by symlink rather than copy
+ 
+v,verbose   Verbose command output
+q,quiet     Suppress output
+force       Force an action
+ 
+h,help      Show the command summary
+version     Display the CompleteShell version
+x           Debug - Turn on Bash trace (set -x) output
+"
+
+main() {
+  : "${COMPLETE_SHELL_ROOT:=$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+
+  check-env
+
+  get-options "$@"
+
+  can "complete-shell:$command_name" ||
+    die "Unknown complete-shell command '$command_name'"
+
+  set +u
+  "complete-shell:$command_name" "${command_args[@]}"
+}
+
+
+#------------------------------------------------------------------------------
+complete-shell:help() {
+  exec man complete-shell
+}
+
+# shellcheck disable=2154
+complete-shell:search() {
+  local term=${1-}
+  (
+    if [[ $term ]]; then
+      grep "$term" "$COMPLETE_SHELL_INDEX"
+    else
+      cat "$COMPLETE_SHELL_INDEX"
+    fi
+  ) |
+  (
+    while read -r name from branch subdir cmds; do
+      [[ $name == '"name"' ]] && continue
+
+      printf "\e[0;32m%s\e[m\n" "$name"
+
+      if $option_verbose; then
+        cat <<...
+  From: $from
+  Cmds: $cmds
+...
+      fi
+    done
+  ) | less -FRX
+}
+
+complete-shell:list() {
+  [[ -d "$COMPLETE_SHELL_COMP" ]] ||
+    die "No complete-shell definitions installed"
+
+  (
+    for comp in $(cd "$COMPLETE_SHELL_COMP" && echo ./*.comp | sort); do
+      comp=${comp#./}
+      comp=${comp%.comp}
+
+      enabled=' '
+      [[ -f $COMPLETE_SHELL_BASH_DIR/$comp.bash ]] ||
+        enabled=x
+
+      printf "%s %s\n" "$enabled" "$comp"
+    done
+  ) | less -FRX
+}
+
+# TODO finish this
+complete-shell:show() {
+  for comp; do
+    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] || {
+      echo "No such completion '$comp'"
+      continue
+    }
+
+    enabled='(enabled)'
+    [[ -e "$COMPLETE_SHELL_BASH_DIR/$comp.bash" ]] ||
+      enabled='(disabled)'
+
+    printf "%s  %s\n" "$comp" "$enabled"
+  done
+}
+
+complete-shell:install() {
+  name="$1"
+
+  line="$(grep "^$name"$'\t' "$COMPLETE_SHELL_INDEX" |
+    grep -v ^name |
+    head -n1
+  )"
+  [[ $line ]] ||
+    die "Invalid complete-shell install name: '$name'"
+
+  read -r name from branch path cmds <<<"$line"
+  local repo_path="$COMPLETE_SHELL_PATH/src/$name"
+
+  if [[ -d $repo_path ]]; then
+    (
+      cd "$repo_path" || return
+      git pull --ff-only &> /dev/null
+      echo "Pulled $from"
+    )
+
+  else
+    git clone --quiet --branch="$branch" "$from" "$repo_path" \
+      &> /dev/null
+    say "Cloned $from"
+  fi
+
+  for file_path in "$repo_path/$path"/*.comp; do
+    # shellcheck disable=2049
+    [[ $file_path =~ \* ]] && break
+    complete-shell:add "$file_path"
+    say "Added ${file_path##*/}"
+  done
+}
+
+complete-shell:add() {
+  [[ $# -gt 0 ]] ||
+    die "usage: complete-shell add <path/to/command.comp>..."
+
+  for comp_file; do
+    [[ -f $comp_file ]] ||
+      die "Can't add '$comp_file'. File does not exist"
+
+    [[ $comp_file == *.comp ]] ||
+      die "Can't add '$comp_file'. File must have '.comp' extension"
+
+    if $option_symlink; then
+      die "--symlink not yet implemented"
+    else
+      cp "$comp_file" "$COMPLETE_SHELL_COMP/"
+      remake "$comp_file"
+    fi
+  done
+}
+
+complete-shell:delete() {
+  [[ $# -gt 0 ]] ||
+    die "usage: complete-shell delete <compgen-name>..."
+
+  for comp; do
+    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
+      die "The compgen '$comp' is not installed"
+
+    rm -f "$COMPLETE_SHELL_COMP/$comp.comp"
+
+    disable "$comp"
+  done
+}
+
+complete-shell:disable() {
+  [[ $# -gt 0 ]] ||
+    die "usage: complete-shell disable <compgen-name>..."
+
+  for comp; do
+    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
+      die "The compgen '$comp' is not installed"
+    rm -f "$COMPLETE_SHELL_BASH_DIR/$comp.bash"
+    disable "$comp"
+  done
+}
+
+complete-shell:enable() {
+  [[ $# -gt 0 ]] ||
+    die "usage: complete-shell enable <compgen-name>..."
+
+  for comp; do
+    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
+      die "The compgen '$comp' is not installed"
+    remake "$comp"
+  done
+}
+
+complete-shell:update() {
+  [[ $# -gt 0 ]] ||
+    die "usage: complete-shell update <compgen-name>..."
+
+  for comp; do
+    [[ $comp =~ ^[-a-zA-Z0-9_]+$ ]] ||
+      die "Invalid compgen name '$comp'"
+    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
+      die "The compgen '$comp' is not installed"
+    if [[ -h "$COMPLETE_SHELL_COMP/$comp.comp" ]]; then
+      target=$(realpath "$COMPLETE_SHELL_COMP/$comp.comp") ||
+        die "Error with 'realpath $COMPLETE_SHELL_COMP/$comp.comp'"
+      dir=$(cd "$(dirname "$target")" && pwd) ||
+        die "Can't get dir for '$comp'"
+      (
+        set -x
+        cd "$dir" || exit
+        git pull --quiet --ff-only
+      )
+    else
+      echo "Can't update '$comp'. It has no upstream."
+    fi
+  done
+}
+
+# Just cd to the complete-shell repo and pull:
+complete-shell:upgrade() {
+  set -x
+  cd "$COMPLETE_SHELL_ROOT" || return
+  git pull --ff-only
+}
+
+complete-shell:alias() {
+  [[ $# -ge 2 ]] ||
+    die "usage: complete-shell alias <cmd> <alias>"
+
+  cmd=$1
+  alias=$2
+
+  [[ -f $COMPLETE_SHELL_BASH_DIR/$cmd.bash ]] ||
+    die "No completion enabled for '$cmd'"
+
+  [[ $alias =~ ^[-a-zA-Z0-9_]+$ ]] ||
+    die "Invalid alias name '$alias'"
+
+  (
+    cd "$COMPLETE_SHELL_COMP" || exit
+    [[ -e "$cmd.comp" ]] &&
+      ln -fs "$cmd.comp" "$alias.comp"
+    [[ -e "$cmd.bash" ]] &&
+      ln -fs "$cmd.bash" "$alias.bash"
+    [[ -e "$cmd.sh" ]] &&
+      ln -fs "$cmd.sh" "$alias.sh"
+    true
+  ) || die
+
+  complete-shell:enable "$alias"
+}
+
+complete-shell:remake() {
+  cd "$COMPLETE_SHELL_COMP"
+
+  for comp in *.comp; do
+    remake "$comp"
+  done
+}
+
+complete-shell:compile() {
+  formats=(bash)
+  [[ ${option_to-} ]] && formats=("$option_to")
+
+  # This function loads the correct compiler for the API version:
+  CompleteShell() {
+    [[ $# -eq 1 && $1 =~ ^v([0-9]+)\.([0-9]+)$ ]] ||
+      die "Invalid CompleteShell arguments '$*'"
+    printf -v compiler_path "%s/lib/v%d_%02d/compiler.bash" \
+      "$COMPLETE_SHELL_ROOT" \
+      "${BASH_REMATCH[1]}" \
+      "${BASH_REMATCH[2]}"
+    source "$compiler_path" 2>/dev/null ||
+      die "Can't source '$compiler_path'"
+    compiler:init
+  }
+
+  for comp_file in "$@"; do
+    if [[ $comp_file != */* ]]; then
+      if [[ -f $COMPLETE_SHELL_COMP/$comp_file.comp ]]; then
+        comp_file="$COMPLETE_SHELL_COMP/$comp_file.comp"
+      else
+        die "'$comp_file' is not a currently installed compgen"
+      fi
+    fi
+
+    [[ -f $comp_file ]] ||
+      die "File '$comp_file' does not exist"
+
+    # Make sure we don't pick up old compiler functions:
+    unset -f N O A C V
+
+    COMPLETE_SHELL_SOURCE=$comp_file source "$comp_file"
+
+    for format in "${formats[@]}"; do
+      if $option_print; then
+        out=/dev/stdout
+      else
+        dir=$(get-output-dir)
+        name=${comp_file%.comp}
+        name=${name##*/}
+        out="$dir/$name.$format"
+      fi
+
+      "emit-$format" > "$out"
+    done
+  done
+}
+
+complete-shell:init() {
+  if $option_force; then
+    temp=$(mktemp -d)
+    (
+      set -x
+      mv "$COMPLETE_SHELL_PATH" "$temp"
+    )
+    echo
+  fi
+
+  if [[ -d $COMPLETE_SHELL_PATH ]]; then
+    say "'$COMPLETE_SHELL_PATH' already initialized"
+    return
+  fi
+
+  mkdir -p \
+    "$COMPLETE_SHELL_SRC" \
+    "$COMPLETE_SHELL_COMP" \
+    "$COMPLETE_SHELL_BASH_DIR" \
+
+  cp "$COMPLETE_SHELL_SHARE/config" "$COMPLETE_SHELL_CONFIG"
+
+  git clone --quiet \
+    "$COMPLETE_SHELL_ROOT/.git" \
+    "$COMPLETE_SHELL_SRC/complete-shell"
+
+  (
+    cd "$COMPLETE_SHELL_COMP" || exit 1
+    ln -s ../src/complete-shell/share/complete-shell.comp \
+      ./complete-shell.comp
+    ln -s ../src/complete-shell/share/complete-shell.bash \
+      ./complete-shell.bash
+  )
+
+  remake complete-shell
+
+  say "Initialized '$COMPLETE_SHELL_PATH'"
+}
+
+#------------------------------------------------------------------------------
+remake() {
+  comp=${1##*/}
+  comp=${comp%.comp}
+  mkdir -p "$COMPLETE_SHELL_PATH/_remake"
+  touch "$COMPLETE_SHELL_PATH/_remake/$comp"
+}
+
+disable() {
+  comp=${1##*/}
+  comp=${comp%.comp}
+  mkdir -p "$COMPLETE_SHELL_PATH/_disable"
+  touch "$COMPLETE_SHELL_PATH/_disable/$comp"
+}
+
+get-output-dir() {
+  if [[ ${COMPLETE_SHELL_COMPILE_OUTPUT_DIR-} ]]; then
+    mkdir -p "$COMPLETE_SHELL_COMPILE_OUTPUT_DIR"
+    echo "${COMPLETE_SHELL_COMPILE_OUTPUT_DIR%/}"
+
+  else
+    mkdir -p "$COMPLETE_SHELL_BASH_DIR"
+    echo "$COMPLETE_SHELL_BASH_DIR"
+  fi
+}
+
+#------------------------------------------------------------------------------
+say() {
+  $option_quiet && return
+
+  for line; do echo "$line"; done
+}
+
+can() {
+  command -v "complete-shell:$command_name" >/dev/null
+}
+
+die() { for line; do echo "$line" >&2; done; exit 1; }
+
+# vim: set ft=sh sw=2 lisp:
+
+#------------------------------------------------------------------------------
+check-env() {
+  : "${COMPLETE_SHELL_PATH:=$HOME/.complete-shell}"
+  : "${COMPLETE_SHELL_CONFIG:=$COMPLETE_SHELL_PATH/config}"
+  : "${COMPLETE_SHELL_SRC:=$COMPLETE_SHELL_PATH/src}"
+  : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_PATH/comp}"
+  : "${COMPLETE_SHELL_BASH_DIR:=$COMPLETE_SHELL_PATH/bash-completion/completions}"
+  : "${COMPLETE_SHELL_SHARE:=$COMPLETE_SHELL_ROOT/share}"
+  : "${COMPLETE_SHELL_INDEX:=$COMPLETE_SHELL_SHARE/search-index.tsv}"
+
+  errors=false
+
+  [[ $(type -t git) == file ]] || {
+    echo "Error: complete-shell requires 'git' to be installed"
+    errors=true
+  }
+
+  if $errors; then exit 1; fi
+}
+
+get-options() {
+  source "$COMPLETE_SHELL_ROOT/lib/getopt.bash"
+
+  local GETOPT_SPEC=$USAGE
+  GETOPT_ARGS='@arguments' \
+    getopt "$@"
+
+  $option_x && set -x
+
+  $option_version && {
+    echo "CompleteShell v$COMPLETE_SHELL_VERSION"
+    exit 0
+  }
+
+  set -- "${arguments[@]}"
+  [[ $# -gt 0 ]] ||
+    die "Error: No command given" "$($0 --help)"
+
+  command_name=$1
+  shift
+  command_args=("$@")
+}
+
+[[ $0 != "${BASH_SOURCE[0]}" ]] || main "$@"
+
+# vim: set ft=sh sw=2 lisp:

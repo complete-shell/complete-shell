@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+pause=0.2
+
+end() {
+  set +x;
+}
+trap end EXIT
+
+main() {
+  #set -x
+
+  while true; do
+    clear
+    setup "$@"
+    cc
+
+    for t; do
+      name=${t##*/}
+      name=${t%.test}
+      r "unset -f _$name"
+      r "complete -r $name" 2>/dev/null
+    done
+
+    r 'clear'
+    say START
+    r "cd $test_root"
+    r "export COMPLETE_SHELL_PATH=$test_root/_complete-shell"
+    r "source $cs_root/.rc test"
+
+    for t; do
+      say "TEST $t"
+      if [[ $t != complete-shell.test ]]; then
+        r "complete-shell add src/${t%.test}.comp"
+        r ''
+      fi
+
+      while read -r line; do
+        if [[ -z $line ]]; then
+          cc
+          echo
+        elif [[ $line =~ ^# ]]; then
+          continue
+        elif [[ $line == . ]]; then
+          printf 'press enter to continue '
+          read -r < /dev/tty
+        else
+          run "$line"
+        fi
+      done < "$t"
+      cc
+    done
+
+    say DONE
+
+    printf 'press enter to run tests again '
+    read -r
+  done
+}
+
+setup() {
+  [[ $TMUX ]] ||
+    die "You need to run this inside tmux (with 2 or 3 panes)." \
+      "Run this in pane 0, output in pane 1, debug in pane 2."
+
+  tmux=($(tmux list-panes -F '#{pane_tty}'))
+  [[ ${#tmux[*]} == [23] ]] ||
+    die "tmux does not appear to be split into 2 or 3 panes."
+
+  [[ $(tmux display -pt "${TMUX_PANE:?}" '#{pane_index}') == '0' ]] ||
+    die "You are not running this in tmux pane '0'."
+
+  test_root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  cs_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+
+  tty=${tmux[1]}
+  [[ $tty =~ ^(/dev/pts/|/dev/ttys)[0-9]+$ ]] ||
+    die "Error with output tty '$tty'"
+
+  r 'unset XXX COMPLETE_SHELL_DEBUG_TTY XTRACEFD'
+  if [[ ${#tmux[*]} -eq 3 ]]; then
+    tmux send-keys -t2 C-l
+    r "export COMPLETE_SHELL_DEBUG_TTY=${tmux[2]}"
+    r "export XTRACEFD=${tmux[2]}"
+    r 'exec 99>$XTRACEFD'
+    r 'BASH_XTRACEFD=99'
+  fi
+
+  [[ $# -gt 0 ]] || die "No test files given"
+}
+
+run() {
+  local cmd=$1
+
+  echo "# ${cmd//\\t/<tab>}"
+
+  t "${cmd//\\t/$'\t'}"
+}
+
+r() {
+  t "$1\n"
+}
+
+t() {
+  line=$1
+  words=()
+
+  while [[ $line ]]; do
+    if [[ $line =~ ^\  ]]; then
+      words+=(Space)
+      line=${line#\ }
+    elif [[ $line =~ ^\\t ]]; then
+      words+=(Tab)
+      line=${line#\\t}
+    elif [[ $line =~ ^\\n ]]; then
+      words+=(C-m)
+      line=${line#\\n}
+    elif [[ $line =~ ^([^\ \\]+) ]]; then
+      words+=("'${BASH_REMATCH[1]}'")
+      line=${line#${BASH_REMATCH[1]}}
+    else
+      die "Can't parse '$line'"
+    fi
+  done
+
+  eval "tmux send-keys -t1 -- ${words[*]}"
+
+  sleep "$pause"
+}
+
+cc() {
+  tmux send-keys -t1 C-c
+}
+
+say() {
+  echo
+  echo "### $1"
+  r ''
+  r "### $1"
+}
+
+die() { (for line; do echo "$line"; done) >&2; exit 1; }
+
+main "$@"

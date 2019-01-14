@@ -1,0 +1,10 @@
+CompleteShell v0.2
+
+N t2
+
+O -a --aardvark
+O -b --beluga =file
+
+C this --long --duck +file
+C that -x -y
+C other -o -k --ok=file

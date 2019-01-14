@@ -1,0 +1,289 @@
+complete-shell
+==============
+
+Modern Tab Completion Everywhere
+
+= Synopsis
+
+  # Install the complete-shell software:
+  git clone https://github.com/complete-shell/complete-shell
+  source /path/to/complete-shell/.rc
+
+  # Try tab completion:
+  complete-shell <tab><tab>
+
+  # Search for existing complete-shell packages:
+  complete-shell search
+
+  # Install the packages you like:
+  complete-shell install this-cmd
+  complete-shell install another-cmd
+
+  this-cmd <TAB><TAB>  # Completion should work!
+
+  # Write your own compdef files. (See below)
+  # Add your compdef files:
+  complete-shell add ./src/foo.comp
+
+  # Learn the other complete-shell commands:
+  complete-shell -h     # Quick reference
+  complete-shell help   # Complete documentation
+
+= Status
+
+WARNING: THIS FRAMEWORK IS VERY NEW.
+
+* Only works on Bash so far
+* Only tested on Mac and Ubuntu Linux so far
+
+Pull Requests welcome!
+
+= Description
+
+CompleteShell adds command completion for everything, everywhere. It provides
+a framework to define command completion in a simple, single file format.
+
+CompleteShell works in:
+
+* Bash
+* zsh (coming soon)
+* Fish (coming soon)
+
+People can easily write complete-shell files for commands that don't yet have
+completion and share them with the world. They can also write their own custom
+files, or fine tune existing ones to their liking.
+
+= Installation
+
+Run these commands:
+
+  # clone the Git repo:
+  git clone https://github.com/complete-shell/complete-shell
+
+  # `source` the `.rc` file in your shell startup configuration file:
+  source /path/to/complete-shell/.rc
+
+That's it!
+
+== Prerequisites
+
+- Bash 3.2+
+
+  Even if you don't use Bash as your shell, `complete-shell` needs it because
+  it is written in Bash. Fortunately most computers have Bash 3.2+ installed.
+
+- Git
+
+  Git is used not only for getting compdef repos, but also for reading and
+  writing to the `complete-shell` config file. It also is used for its (totally
+  awesome) command line options parsing facility.
+
+- Completion Subsystem
+
+  CompleteShell attempts to fit into your Shell's existing Completion system.
+
+  For Bash, there is system that almost everyone uses. It can usually be found
+  in `/usr/share/bash-completion/` or `/etc/bash_completion*` (older systems
+  and Mac). CompleteShell will check to make sure this subsystem is in place.
+
+  For Zsh and Fish, completion facitities are first class parts of the shell.
+  CompleteShell will compile to code that fits right in.
+
+= Commands
+
+- `complete-shell help`
+
+  Display the complete-shell manpage. Same as `man complete-shell`.
+
+  The `-h` option will display a quick reference help guide.
+
+- `complete-shell search [<search string>]`
+
+  Find registered completion packages that are available online.
+
+- `complete-shell list`
+
+  List all your installed completion packages.
+
+- `complete-shell show <compdef-name>`
+
+  Show information about a completion definition.
+
+- `complete-shell install <package>`
+
+  Installs compdef files from git repos online. You can find these repos using
+  the `search` command or use other ones that you know about. `compdef-target`
+  can be a simple name (found in search) or a git repo URL.
+
+- `complete-shell add <compdef-filepath>`
+
+  Adds a local compdef file path to your config. It will be enabled by
+  default.
+
+- `complete-shell delete <compdef-name>`
+
+  Delete a compdef file from your configuration.
+
+- `complete-shell disable <compdef-name>`
+
+  Disable a compdef (but don't delete it). Use this to turn of a specific
+  command completion temporarily. Use the `enable` command to turn it back on.
+
+- `complete-shell enable <compdef-name>`
+
+  Enable a compdef. Usually only after you have disabled it.
+
+- `complete-shell update <compdef-name>`
+
+  Update specific compdef to their latest version.
+
+- `complete-shell upgrade`
+
+  Upgrade your `complete-shell` installation to the latest version.
+
+- `complete-shell compile <compdef-name-or-path>`
+
+  Compdef files are themselves valid shell files. (A common subset of Bash, Zsh
+  and Fish!). They get compiled into leaner shell-specific files that are tuned
+  for the tab completion facilities of the particular shell.
+
+- `complete-shell alias <compdef-name> <alias-name>
+
+  This command will create an alias completion for an existing alias of a
+  command.  command completion. Try making the alias `cs` for the command
+  `complete-shell`:
+
+    alias cs=complete-shell
+    complete-shell alias complete-shell cs
+
+= The `compdef` File
+
+A complete-shell "command completion definition" ("compdef" for short) file is
+a minimal DSL that allows people to specify how command completion should work
+for a given command:
+
+Here is a simple example. Define a file called `foo.comp`:
+
+  # Required header declaring the API version:
+  CompleteShell v0.2
+
+  # Command name:
+  N foo     ..The mighty foo CLI
+
+  # Command options:
+  O --aaa   ..The aaa option
+  O --bbb =file \
+            ..The bbb option
+
+  # Sub-commands:
+  C bar +str            ..Do the bar
+  C baz +num +dir       ..Do the baz
+
+Then run:
+
+  complete-shell add foo.comp
+
+Now you have command completion for the `foo` command!
+
+The `complete-shell` command itself comes with a compdef file that you can find
+in `/path/to/complete-shell/share/complete-shell.comp`.
+
+== compdef File Guidelines
+
+* compdef files are named `<name>.comp`
+* The name should be either:
+  * The name of the CLI command for which it adds support
+  * The name of a project that has multiple commands
+* Shell specific functions go in `<name>.<shell>`
+  * Bash uses `<name>.bash` or `<name>.sh`
+  * Zsh uses `<name>.zsh` or `<name>.sh`
+  * Fish uses `<name>.fish`
+  * A `<name>.sh` is POSIX shell code that works in Bash or Zsh
+* A compdef file can define completions for one or more commands
+* A compdef Git repo contains one or more comdef files
+  * A set of compdef files is called a package
+* A compdef file uses the syntax described in the next section
+
+== The `compdef` Language
+
+The compdef files are written in a simple DSL. The DSL has a set of simple
+commands that are usually a single capital letter. Blank lines and `#` comments
+are supported.
+
+The DSL happens to a common subset of the Bash, Zsh and Fish shell languages,
+but compdef files should not contain any statements that are not documented by
+the DSL.
+
+The DSL is versioned and can change over time. It is designed to be forward
+and backward compatible. ie People can use compdef files of any DSL version,
+and authors can not worry about their compdefs breaking with future
+`complete-shell` releases. Users *will* need to upgrade `complete-shell` to at
+least the version of the most modern compdef file's API version that they want
+to use.
+
+== The `compdef` v0.2 Syntax
+
+A compdef files consists of comments, blank lines and single-line command
+statements.
+
+This is a list of the compdef statement commands:
+
+- `CompleteShell v0.2`
+
+  The first statement in every compdef file must be `CompleteShell` and must
+  have a version argument as shown above. The version is used to invoke the
+  appropriate compiler and runtime for that file.
+
+- `N <name>`
+
+  The name of the statement for which completion is being defined. This is the
+  second statement in the file. All other statement apply to this `name` until
+  the end of file or another `N` command starts a new definition.
+
+- `O <--option>`
+
+  This defines an option that applies to the CLI command. `O` is also used to
+  define options that are specific to a sub-command (when they follow the
+  sub-command's `C` command).
+
+- `A <+arg-type>...`
+
+  This defines the arguments and their types. An arg type always starts with a
+  `+` character. For example, `+file-path` called a function named `file-path`
+  to list the completions that can happen for that argument. `A` can be used
+  for a normal command, or for sub-commands.
+
+- `C <subcommand name>`
+
+  This defines a subcommand that applies to the CLI command.
+
+- `V @<var-name> = <set of command words>`
+
+  For the purposes of reusing common definitions, `V` lets you define
+  variables. The variables always begin with a `@`.
+
+== Sharing `compdef` Files
+
+Sharing compdef files is simple. Create a Git repo for your compdef files:
+
+  ReadMe          # Describe your repo
+  foo.comp        # compdef for the foo command
+  bars.comp       # compdef for the bar commands
+
+Then push it to a public Git host, like GitHub or BitBucket.
+
+If you want it to be found in the `complete-shell search` command, then
+register it with complete-shell:
+
+* Fork/clone https://github.com/complete-shell/complete-shell
+* Add your repo to the `share/search-index.tsv` file
+* Commit and push
+* Create a GitHub Pull Request
+
+= Copyright and License
+
+Copyright 2019. Ingy döt Net <ingy@ingy.net>.
+
+CompleteShell is released under the MIT license.
+
+See the file LICENSE for more details.

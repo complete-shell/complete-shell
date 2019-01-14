@@ -1,0 +1,8 @@
+CompleteShell v0.2
+
+N t1
+
+C food +dir +git-recent-branches +file \
+          ..Need food badly
+C barge   ..Barge right in
+C baz     ..Bizarre bazaar

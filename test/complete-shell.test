@@ -1,0 +1,7 @@
+complete-shell \t
+up\t
+g\t
+
+complete-shell compile --t\t
+\t
+f\t

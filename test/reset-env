@@ -1,0 +1,51 @@
+#! bash
+
+if [[ ${1-} == exec ]]; then
+  bind '"\e[0n": "git_prompt_toggle\n"'; printf '\r\e[5n\r'
+  git_prompt_toggle
+  sleep 0.2
+  cd $HOME
+  sleep 0.2
+  set PS1='> '
+  sleep 0.2
+  cd $OLDPWD
+  sleep 0.2
+  return
+
+elif [[ ${1-} == print ]]; then
+  clear
+  (
+    set |
+      grep complete-shell |
+      grep -Ev '^(PATH|MANPATH|PWD|OLDPWD)='
+
+    echo
+
+    complete | grep -E '.+complete'
+
+    echo
+
+    cat <<...
+PATH=${PATH:0:COLUMNS-8}...
+XDG_DATA_DIRS=$XDG_DATA_DIRS
+
+...
+  ) | less -FRX
+
+else
+  unset XDG_DATA_DIRS comp path
+
+  unset -f __complete-shell:compgen
+
+  complete -r cs complete-shell 2>/dev/null
+  complete -r dummy1 2>/dev/null
+  complete -r t1 t2 2>/dev/null
+
+  rm -fr _complete-shell
+
+  export COMPLETE_SHELL_PATH=$PWD/_complete-shell
+  source ../.rc test
+
+  alias cs=complete-shell
+  complete-shell alias complete-shell cs
+fi
