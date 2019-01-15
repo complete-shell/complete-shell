@@ -1,3 +1,6 @@
+## v0.2.3   2019/01/15
+- Added `complete-prove` to index and removed `complete-shell`
+
 ## v0.2.2   2019/01/14
 - Removed the config file concept
   - Not needed yet

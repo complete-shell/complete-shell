@@ -1,3 +1,2 @@
 "name"	"from"	"branch"	"path"	"cmds"
-complete-shell	https://github.com/complete-shell/complete-shell	master	share	complete-shell
-dummy1	https://github.com/complete-shell/complete-dummy1	master	src	dummy1
+prove	https://github.com/complete-shell/complete-prove	master	.	prove
