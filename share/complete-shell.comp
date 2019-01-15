@@ -35,6 +35,8 @@ C enable    ..Re-enable a disabled definition
 C update    ..Update packages
   A +installed
 C upgrade   ..Upgrade complete-shell software
+C remake +enabled \
+            ..Rebuild changed completions
 C compile   ..Compile or recompile a package
   O -t --to =[bash,zsh,fish] \
               ..Compiler target shell

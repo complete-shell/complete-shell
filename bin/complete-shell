@@ -24,8 +24,8 @@ Commands:
   enable    Re-enable a disabled definition
   update    Update packages
   upgrade   Upgrade complete-shell software
+  remake    Rebuild definitions
   alias     Create a completion alias for a command
-  remake    Rebuild all the installed definitions
 
 See 'complete-shell help' for complete help.
 
@@ -72,6 +72,7 @@ complete-shell:search() {
   (
     if [[ $term ]]; then
       grep "$term" "$COMPLETE_SHELL_INDEX"
+
     else
       cat "$COMPLETE_SHELL_INDEX"
     fi
@@ -188,6 +189,9 @@ complete-shell:delete() {
     [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
       die "The compgen '$comp' is not installed"
 
+    [[ $comp != complete-shell ]] ||
+      die "delete 'complete-shell' is not allowed"
+
     rm -f "$COMPLETE_SHELL_COMP/$comp.comp"
 
     disable "$comp"
@@ -201,7 +205,12 @@ complete-shell:disable() {
   for comp; do
     [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
       die "The compgen '$comp' is not installed"
+
+    [[ $comp != complete-shell ]] ||
+      die "disable 'complete-shell' is not allowed"
+
     rm -f "$COMPLETE_SHELL_BASH_DIR/$comp.bash"
+
     disable "$comp"
   done
 }
@@ -213,6 +222,10 @@ complete-shell:enable() {
   for comp; do
     [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
       die "The compgen '$comp' is not installed"
+
+    [[ $comp != complete-shell ]] ||
+      die "enable 'complete-shell' is not allowed"
+
     remake "$comp"
   done
 }
@@ -224,18 +237,23 @@ complete-shell:update() {
   for comp; do
     [[ $comp =~ ^[-a-zA-Z0-9_]+$ ]] ||
       die "Invalid compgen name '$comp'"
+
     [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
       die "The compgen '$comp' is not installed"
+
     if [[ -h "$COMPLETE_SHELL_COMP/$comp.comp" ]]; then
       target=$(realpath "$COMPLETE_SHELL_COMP/$comp.comp") ||
         die "Error with 'realpath $COMPLETE_SHELL_COMP/$comp.comp'"
+
       dir=$(cd "$(dirname "$target")" && pwd) ||
         die "Can't get dir for '$comp'"
+
       (
         set -x
         cd "$dir" || exit
         git pull --quiet --ff-only
       )
+
     else
       echo "Can't update '$comp'. It has no upstream."
     fi
@@ -245,12 +263,14 @@ complete-shell:update() {
 # Just cd to the complete-shell repo and pull:
 complete-shell:upgrade() {
   set -x
+
   cd "$COMPLETE_SHELL_ROOT" || return
+
   git pull --ff-only
 }
 
 complete-shell:alias() {
-  [[ $# -ge 2 ]] ||
+  [[ $# -eq 2 ]] ||
     die "usage: complete-shell alias <cmd> <alias>"
 
   cmd=$1
@@ -276,13 +296,21 @@ complete-shell:alias() {
   complete-shell:enable "$alias"
 }
 
-complete-shell:remake() {
+complete-shell:remake() (
   cd "$COMPLETE_SHELL_COMP"
 
-  for comp in *.comp; do
+  [[ $# -gt 0 ]] || set -- *.comp
+
+  for comp; do
+    [[ $comp == *.comp ]] ||
+      comp+=.comp
+
+    [[ -f $comp ]] ||
+      continue
+
     remake "$comp"
   done
-}
+)
 
 complete-shell:compile() {
   formats=(bash)
@@ -292,12 +320,15 @@ complete-shell:compile() {
   CompleteShell() {
     [[ $# -eq 1 && $1 =~ ^v([0-9]+)\.([0-9]+)$ ]] ||
       die "Invalid CompleteShell arguments '$*'"
+
     printf -v compiler_path "%s/lib/v%d_%02d/compiler.bash" \
       "$COMPLETE_SHELL_ROOT" \
       "${BASH_REMATCH[1]}" \
       "${BASH_REMATCH[2]}"
+
     source "$compiler_path" 2>/dev/null ||
       die "Can't source '$compiler_path'"
+
     compiler:init
   }
 
@@ -305,6 +336,7 @@ complete-shell:compile() {
     if [[ $comp_file != */* ]]; then
       if [[ -f $COMPLETE_SHELL_COMP/$comp_file.comp ]]; then
         comp_file="$COMPLETE_SHELL_COMP/$comp_file.comp"
+
       else
         die "'$comp_file' is not a currently installed compgen"
       fi
@@ -321,6 +353,7 @@ complete-shell:compile() {
     for format in "${formats[@]}"; do
       if $option_print; then
         out=/dev/stdout
+
       else
         dir=$(get-output-dir)
         name=${comp_file%.comp}
@@ -353,15 +386,11 @@ complete-shell:init() {
     "$COMPLETE_SHELL_COMP" \
     "$COMPLETE_SHELL_BASH_DIR" \
 
-  git clone --quiet \
-    "$COMPLETE_SHELL_ROOT/.git" \
-    "$COMPLETE_SHELL_SRC/complete-shell"
-
   (
     cd "$COMPLETE_SHELL_COMP" || exit 1
-    ln -s ../src/complete-shell/share/complete-shell.comp \
+    ln -s "$COMPLETE_SHELL_ROOT/share/complete-shell.comp" \
       ./complete-shell.comp
-    ln -s ../src/complete-shell/share/complete-shell.bash \
+    ln -s "$COMPLETE_SHELL_ROOT/share/complete-shell.bash" \
       ./complete-shell.bash
   )
 
