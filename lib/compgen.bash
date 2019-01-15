@@ -71,6 +71,7 @@ __complete-shell:compgen() {
       fi
 
       bind 'set show-all-if-ambiguous on' 2>/dev/null
+      bind 'set show-all-if-unmodified on' 2>/dev/null
       bind 'set print-completions-horizontally on' 2>/dev/null
       compopt -o nosort 2>/dev/null
 
