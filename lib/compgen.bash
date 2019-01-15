@@ -17,9 +17,12 @@
 __complete-shell:compgen() {
   local comp_word=${COMP_WORDS[COMP_CWORD]}
   [[ $comp_word == '=' ]] && comp_word=
+
+  local compgen_file
   printf -v compgen_file "%s/lib/%s/compgen.bash" \
     "$COMPLETE_SHELL_ROOT" \
     "$complete_shell_api_version"
+
   local compgen_func=compgen-$complete_shell_api_version
 
   local hints=()
