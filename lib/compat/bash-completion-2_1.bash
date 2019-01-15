@@ -34,5 +34,8 @@ _completion_loader() {
     complete -F _filedir_xspec "$cmd" &&
     return 124
 
+  complete -F _minimal "$cmd" &&
+    return 124
+
   return 1
 }
