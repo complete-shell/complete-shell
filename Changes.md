@@ -1,3 +1,11 @@
+## v0.2.2   2019/01/14
+- Removed the config file concept
+  - Not needed yet
+  - Environment variables are simpler for this
+- Set better readline defaults
+  - Set them at init time. Better behavior.
+  - Add minimal completion to compat/bash-completion-2.1 loader
+
 ## v0.2.1   2019/01/14
 - Initial release
 - Install/enable with `source .rc` or
