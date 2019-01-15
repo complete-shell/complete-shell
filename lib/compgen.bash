@@ -96,15 +96,18 @@ __complete-shell:compgen() {
 
     COMPREPLY+=(' ')
 
+    # bind "set completion-display-width ${COLUMNS:-'-1'}"
+
     compopt -o nosort 2>/dev/null
   fi
 
   return 0
 }
 
+bind 'set completion-query-items 0' 2>/dev/null
+bind 'set print-completions-horizontally on' 2>/dev/null
 bind 'set show-all-if-ambiguous on' 2>/dev/null
 bind 'set show-all-if-unmodified on' 2>/dev/null
-bind 'set print-completions-horizontally on' 2>/dev/null
 
 #------------------------------------------------------------------------------
 # Completion debugging helper:
