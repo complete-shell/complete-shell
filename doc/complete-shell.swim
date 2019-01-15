@@ -74,9 +74,8 @@ That's it!
 
 - Git
 
-  Git is used not only for getting compdef repos, but also for reading and
-  writing to the `complete-shell` config file. It also is used for its (totally
-  awesome) command line options parsing facility.
+  Git is used for getting compdef repos to install and also is used for its
+  (totally awesome) command line options parsing facility.
 
 - Completion Subsystem
 

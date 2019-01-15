@@ -1,7 +1,0 @@
-[option "bash"]
-    feature-level = standard
-    show-descriptions = false
-
-[option "zsh"]
-
-[option "fish"]

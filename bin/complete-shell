@@ -353,8 +353,6 @@ complete-shell:init() {
     "$COMPLETE_SHELL_COMP" \
     "$COMPLETE_SHELL_BASH_DIR" \
 
-  cp "$COMPLETE_SHELL_SHARE/config" "$COMPLETE_SHELL_CONFIG"
-
   git clone --quiet \
     "$COMPLETE_SHELL_ROOT/.git" \
     "$COMPLETE_SHELL_SRC/complete-shell"

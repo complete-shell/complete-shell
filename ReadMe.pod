@@ -23,14 +23,14 @@ complete-shell - Modern Tab Completion Everywhere
     complete-shell search
 
     # Install the packages you like:
-    complete-shell install tmux
-    complete-shell install openstack
+    complete-shell install this-cmd
+    complete-shell install another-cmd
 
-    tmux <TAB><TAB>  # Completion should work!
+    this-cmd <TAB><TAB>  # Completion should work!
 
     # Write your own compdef files. (See below)
-    # Enable your compdef files:
-    complete-shell enable this that
+    # Add your compdef files:
+    complete-shell add ./src/foo.comp
 
     # Learn the other complete-shell commands:
     complete-shell -h     # Quick reference
@@ -94,9 +94,8 @@ it is written in Bash. Fortunately most computers have Bash 3.2+ installed.
 
 =item Git
 
-Git is used not only for getting compdef repos, but also for reading and
-writing to the C<complete-shell> config file. It also is used for its (totally
-awesome) command line options parsing facility.
+Git is used for getting compdef repos to install and also is used for its
+(totally awesome) command line options parsing facility.
 
 =item Completion Subsystem
 
