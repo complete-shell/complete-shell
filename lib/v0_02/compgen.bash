@@ -67,6 +67,8 @@ parse-command-line() {
   (( i > 2 )) && : $(( i-- )) && comp_prev=${!i}
   (( i > 2 )) && : $(( i-- )) && comp_third=${!i}
 
+  unset sub_cmds[0]
+
   local word='' opts=() count=0 i=0
   for word; do
     if [[ $((count++)) -eq 0 ]]; then
@@ -180,7 +182,7 @@ complete-option-values() {
 }
 
 complete-sub-commands() {
-  [[ $sub_cmds && -z $comp_scmd ]] || return 1
+  [[ ${#sub_cmds[*]} -gt 0 && -z $comp_scmd ]] || return 1
 
   l=-1
   for ((i = 1; i < ${#sub_cmds[*]}; i++)); do

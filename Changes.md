@@ -1,5 +1,6 @@
 ## v0.2.3   2019/01/15
 - Added `complete-prove` to index and removed `complete-shell`
+- Fix issue #1 - Sub command completer blocking argument completion
 
 ## v0.2.2   2019/01/14
 - Removed the config file concept
