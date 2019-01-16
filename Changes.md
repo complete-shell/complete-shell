@@ -1,5 +1,8 @@
 ## v0.2.4   2019/01/16
 - Fix #2 - Long completions display badly on OSX
+- Fix shellcheck errors (upgraded to shellcheck 0.6.0)
+- Add .rc and .bashrc to shellcheck testing
+- Add --version to complete-shell comp file
 
 ## v0.2.3   2019/01/15
 - Added `complete-prove` to index and removed `complete-shell`
