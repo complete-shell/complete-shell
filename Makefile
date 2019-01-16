@@ -9,8 +9,10 @@ default:
 
 .PHONY: test
 test:
+	shellcheck .rc
+	shellcheck .bashrc
 	@for file in $$(find . | grep 'sh$$' | grep -v '/\.git/'); do \
- 	    echo "=== $$file"; \
+ 	    echo "shellcheck $$file"; \
  	    shellcheck $$file; \
  	done
 
