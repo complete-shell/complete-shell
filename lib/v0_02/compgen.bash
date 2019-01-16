@@ -67,7 +67,7 @@ parse-command-line() {
   (( i > 2 )) && : $(( i-- )) && comp_prev=${!i}
   (( i > 2 )) && : $(( i-- )) && comp_third=${!i}
 
-  unset sub_cmds[0]
+  unset 'sub_cmds[0]'
 
   local word='' opts=() count=0 i=0
   for word; do
