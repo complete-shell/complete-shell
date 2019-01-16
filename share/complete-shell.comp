@@ -10,6 +10,8 @@ N complete-shell
   # Command level options:
   O -h --help \
             ..Show the command summary
+  O --version \
+            ..Show the complete-shell version
   O -x      ..Debug - Turn on Bash trace \(set -x\) output
 
 # complete-shell sub-commands:
