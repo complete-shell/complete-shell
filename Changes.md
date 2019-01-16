@@ -1,3 +1,6 @@
+## v0.2.4   2019/01/16
+- Fix #2 - Long completions display badly on OSX
+
 ## v0.2.3   2019/01/15
 - Added `complete-prove` to index and removed `complete-shell`
 - Fix issue #1 - Sub command completer blocking argument completion

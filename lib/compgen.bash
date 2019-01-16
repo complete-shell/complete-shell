@@ -104,8 +104,10 @@ __complete-shell:compgen() {
   return 0
 }
 
+if [[ ${BASH_VERSINFO[0]} != '3' ]]; then
+  bind 'set print-completions-horizontally on' 2>/dev/null
+fi
 bind 'set completion-query-items 0' 2>/dev/null
-bind 'set print-completions-horizontally on' 2>/dev/null
 bind 'set show-all-if-ambiguous on' 2>/dev/null
 bind 'set show-all-if-unmodified on' 2>/dev/null
 
