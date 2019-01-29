@@ -1,3 +1,8 @@
+## v0.2.5   2019/01/29
+- Support config file and settings
+- Default to current Bash settings
+- Make it easy to opt-in to new stuff
+
 ## v0.2.4   2019/01/16
 - Fix #2 - Long completions display badly on OSX
 - Fix shellcheck errors (upgraded to shellcheck 0.6.0)
