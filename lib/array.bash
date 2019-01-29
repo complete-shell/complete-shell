@@ -18,7 +18,7 @@ Array.get() {
 }
 
 Array.set() {
-  IFS=$'\n' read -r "$1"[$2] <<< "$3"
+  printf -v "$1"[$2] '%s' "$3"
 }
 
 Array.push() {

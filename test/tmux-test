@@ -24,11 +24,13 @@ main() {
       r "complete -r $name" 2>/dev/null
     done
 
+    r 'PS1="> "'
     r 'clear'
     say START
     r "cd $test_root"
     r "export COMPLETE_SHELL_PATH=$test_root/_complete-shell"
     r "source $cs_root/.rc test"
+    r 'complete-shell config modern_settings true'
 
     for t; do
       say "TEST $t"

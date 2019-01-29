@@ -1,6 +1,9 @@
-# shellcheck shell=bash
+# shellcheck shell=bash disable=1090,2154
 
-: "${COMPLETE_SHELL_PATH:=$HOME/.complete-shell}"
+config-keys() {
+  source "$COMPLETE_SHELL_CONFIG" || return 0
+  printf "%s\n" "${config_keys[@]}"
+}
 
 all-compgens() {
   while IFS='' read -r line; do

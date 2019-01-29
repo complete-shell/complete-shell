@@ -93,7 +93,7 @@ getopt() {
     $found || die "Unexpected option: '$option'"
   done
 
-  local arg_name arg_var required=false array=false re1='^\+'
+  local i arg_name arg_var required=false array=false re1='^\+'
   for arg_name in $GETOPT_ARGS; do
     arg_var="${arg_name//-/_}"
     if [[ $arg_var =~ ^@ ]]; then
@@ -107,10 +107,9 @@ getopt() {
 
     if [[ $# -gt 0 ]]; then
       if $array; then
-        # XXX do this without eval:
-        set -f
-        eval "$arg_var=($*)"
-        set +f
+        for ((i = 1; i <= $#; i++)); do
+          printf -v "$arg_var"[$i-1] '%s' "${!i}"
+        done
         set --
       else
         printf -v "$arg_var" "%s" "$1"

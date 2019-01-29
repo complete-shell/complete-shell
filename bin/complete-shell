@@ -14,6 +14,7 @@ USAGE="\
 Commands:
 
   help      View full documentation
+  config    Set or show config settings
   search    Find CompleteShell completion packages
   list      List installed definitions
   show      Show information about definition
@@ -64,6 +65,51 @@ main() {
 #------------------------------------------------------------------------------
 complete-shell:help() {
   exec man complete-shell
+}
+
+complete-shell:config() {
+  source "$COMPLETE_SHELL_ROOT/lib/config.bash" get
+
+  if [[ $# -eq 0 ]]; then
+    echo "# From '$config_file'"
+    for ((i = 0; i < ${#config_keys[*]}; i++)); do
+      key=${config_keys[i]}
+      value=${!key-}
+      actual=${config_vals[i]}
+
+      printf -v line "%s=%s" "$key" "$actual"
+      if [[ $value == $actual ]]; then
+        echo "$line"
+      else
+        printf "%-20s (%s)\n" "$line" "$value"
+      fi
+    done
+    return
+  fi
+
+  found=false
+  for key in "${config_keys[@]}"; do
+    if [[ $1 == "$key" ]]; then
+      found=true
+      break
+    fi
+  done
+  $found || die "Invalid key '$1'"
+
+  if [[ $# -eq 1 ]]; then
+    echo "${!key-}"
+
+  elif [[ $# -eq 2 ]]; then
+    [[ $2 == @(true|false|) ]] ||
+      die "Invalid value '$2'. Must be true, false, or ''."
+    text=$(grep -Ev "^$1=" "$COMPLETE_SHELL_CONFIG")
+    [[ $2 ]] && text+=$'\n'"$1=$2"
+    echo "$text" > "$COMPLETE_SHELL_CONFIG"
+    touch "$COMPLETE_SHELL_PATH/_config"
+
+  else
+    die "Too many aruments for 'complete-shell config'"
+  fi
 }
 
 # shellcheck disable=2154
@@ -385,6 +431,10 @@ complete-shell:init() {
     "$COMPLETE_SHELL_SRC" \
     "$COMPLETE_SHELL_COMP" \
     "$COMPLETE_SHELL_BASH_DIR" \
+    "${COMPLETE_SHELL_CONFIG%/*}" \
+
+  [[ $COMPLETE_SHELL_SHELL == bash ]] &&
+    printf "$BASH_CONFIG_TEXT" > "$COMPLETE_SHELL_CONFIG"
 
   (
     cd "$COMPLETE_SHELL_COMP" || exit 1
@@ -398,6 +448,14 @@ complete-shell:init() {
 
   say "Initialized '$COMPLETE_SHELL_PATH'"
 }
+
+BASH_CONFIG_TEXT="\
+#     CompleteShell Configuration Settings
+#
+# Use 'complete-shell-config' to show and set these.
+# See 'complete-shell help' for more details.
+
+"
 
 #------------------------------------------------------------------------------
 remake() {
@@ -433,17 +491,15 @@ say() {
 }
 
 can() {
-  command -v "complete-shell:$command_name" >/dev/null
+  command -v "$1" >/dev/null
 }
 
 die() { for line; do echo "$line" >&2; done; exit 1; }
 
-# vim: set ft=sh sw=2 lisp:
-
 #------------------------------------------------------------------------------
 check-env() {
   : "${COMPLETE_SHELL_PATH:=$HOME/.complete-shell}"
-  : "${COMPLETE_SHELL_CONFIG:=$COMPLETE_SHELL_PATH/config}"
+  : "${COMPLETE_SHELL_CONFIG:=$COMPLETE_SHELL_PATH/config/${COMPLETE_SHELL_SHELL:?}}"
   : "${COMPLETE_SHELL_SRC:=$COMPLETE_SHELL_PATH/src}"
   : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_PATH/comp}"
   : "${COMPLETE_SHELL_BASH_DIR:=$COMPLETE_SHELL_PATH/bash-completion/completions}"

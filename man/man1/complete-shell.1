@@ -86,6 +86,9 @@ complete-shell \- Modern Tab Completion Everywhere
 \&    git clone https://github.com/complete\-shell/complete\-shell
 \&    source /path/to/complete\-shell/.rc
 \&
+\&    # Turn on the cool modern features (off by default):
+\&    complete\-shell config modern_settings true
+\&
 \&    # Try tab completion:
 \&    complete\-shell <tab><tab>
 \&
@@ -128,6 +131,8 @@ zsh (coming soon)
 Fish (coming soon)
 .PP
 People can easily write complete-shell files for commands that don't yet have completion and share them with the world. They can also write their own custom files, or fine tune existing ones to their liking.
+.PP
+CompleteShell also does Bash completion like you've never seen it. It can show you completion descriptions, show command usage, show hints to help you along, and turn on the more modern Bash completion options (like pressing \s-1TAB\s0 once instead of twice). These things are configurable by you.
 .SH "Installation"
 .IX Header "Installation"
 Run these commands:
@@ -141,6 +146,12 @@ Run these commands:
 .Ve
 .PP
 That's it!
+.PP
+You should also really try turning on the cool modern settings:
+.PP
+.Vb 1
+\&    complete\-shell config modern_settings true
+.Ve
 .SS "Prerequisites"
 .IX Subsection "Prerequisites"
 .IP "Bash 3.2+" 4
@@ -155,15 +166,24 @@ CompleteShell attempts to fit into your Shell's existing Completion system.
 .Sp
 For Bash, there is system that almost everyone uses. It can usually be found in \f(CW\*(C`/usr/share/bash\-completion/\*(C'\fR or \f(CW\*(C`/etc/bash_completion*\*(C'\fR (older systems and Mac). CompleteShell will check to make sure this subsystem is in place.
 .Sp
-For Zsh and Fish, completion facitities are first class parts of the shell. CompleteShell will compile to code that fits right in.
-.SH "Commands"
-.IX Header "Commands"
+For Zsh and Fish, completion facilities are first class parts of the shell. CompleteShell will compile to code that fits right in.
+.ie n .SH "The ""complete\-shell"" CLI"
+.el .SH "The \f(CWcomplete\-shell\fP CLI"
+.IX Header "The complete-shell CLI"
 .ie n .IP """complete\-shell help""" 4
 .el .IP "\f(CWcomplete\-shell help\fR" 4
 .IX Item "complete-shell help"
 Display the complete-shell manpage. Same as \f(CW\*(C`man complete\-shell\*(C'\fR.
 .Sp
 The \f(CW\*(C`\-h\*(C'\fR option will display a quick reference help guide.
+.ie n .IP """complete\-shell config [<key> [<value>]]""" 4
+.el .IP "\f(CWcomplete\-shell config [<key> [<value>]]\fR" 4
+.IX Item "complete-shell config [<key> [<value>]]"
+With no arguments, show all settings. With 1 argument, print the value for a key. With 2 arguments, set a key to a value.
+.Sp
+Config values are stored in \f(CW\*(C`$COMPLETE_SHELL_PATH/config/<shell>\*(C'\fR (usually \f(CW\*(C`~/.complete\-shell/config/bash\*(C'\fR).
+.Sp
+See \*(L"Configuration Options\*(R" below.
 .ie n .IP """complete\-shell search [<search string>]""" 4
 .el .IP "\f(CWcomplete\-shell search [<search string>]\fR" 4
 .IX Item "complete-shell search [<search string>]"
@@ -216,6 +236,45 @@ This command will create an alias completion for an existing alias of a command.
 \&    alias cs=complete\-shell
 \&    complete\-shell alias complete\-shell cs
 .Ve
+.SH "Configuration Options"
+.IX Header "Configuration Options"
+These options all default to \f(CW\*(C`false\*(C'\fR. To turn on an option:
+.PP
+.Vb 1
+\&    complete\-shell config <option> true
+.Ve
+.ie n .IP """disabled""" 4
+.el .IP "\f(CWdisabled\fR" 4
+.IX Item "disabled"
+Disable CompleteShell tab completion altogether.
+.ie n .IP """modern_settings""" 4
+.el .IP "\f(CWmodern_settings\fR" 4
+.IX Item "modern_settings"
+An umbrella option to always use the most modern CompleteShell settings. Effectively set these to true: \f(CW\*(C`single_tab\*(C'\fR, \f(CW\*(C`no_prompt\*(C'\fR, \f(CW\*(C`show_descriptions\*(C'\fR, \f(CW\*(C`show_usage\*(C'\fR, \f(CW\*(C`show_hints\*(C'\fR.
+.ie n .IP """single_tab""" 4
+.el .IP "\f(CWsingle_tab\fR" 4
+.IX Item "single_tab"
+Only require a single \s-1TAB\s0 press to trigger completion.
+.ie n .IP """no_prompt""" 4
+.el .IP "\f(CWno_prompt\fR" 4
+.IX Item "no_prompt"
+Disable prompt for more than 100 completions. When text is too big for the screen it will start a pager.
+.ie n .IP """show_descriptions""" 4
+.el .IP "\f(CWshow_descriptions\fR" 4
+.IX Item "show_descriptions"
+CompleteShell completions can have short descriptions. Set this option if you want to see them.
+.ie n .IP """show_usage""" 4
+.el .IP "\f(CWshow_usage\fR" 4
+.IX Item "show_usage"
+Some commands have a defined usage, which is helpful to have when writing the command. Turn this on to see them.
+.ie n .IP """show_hints""" 4
+.el .IP "\f(CWshow_hints\fR" 4
+.IX Item "show_hints"
+CompleteShell can give you hints about certain things when it thinks they'll be useful. Use this to enable them.
+.ie n .IP """no_horizontal""" 4
+.el .IP "\f(CWno_horizontal\fR" 4
+.IX Item "no_horizontal"
+Recent Bash versions allow for completions to be sorted horizontally, which is usually better. We turn that on for you if available. Use this to keep the Bash default.
 .ie n .SH "The ""compdef"" File"
 .el .SH "The \f(CWcompdef\fP File"
 .IX Header "The compdef File"

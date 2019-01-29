@@ -44,4 +44,12 @@ source "$COMPLETE_SHELL_ROOT/lib/compgen.bash"
 # Make sure the COMPLETE_SHELL_PATH directory is setup.
 # This is where all the compdef files and your config file reside.
 # This is typically ~/.complete-shell/  (default)
-complete-shell init --quiet
+COMPLETE_SHELL_SHELL=bash \
+  complete-shell init --quiet
+
+# Save the current readline values before changing them:
+bind -v |
+  grep -E ' (print-completions-horizontally|completion-query-items|show-all-if-ambiguous|show-all-if-unmodified) ' \
+  > "${COMPLETE_SHELL_PATH:-$HOME/.complete-shell}/.defaults"
+
+source "$COMPLETE_SHELL_ROOT/lib/config.bash" apply

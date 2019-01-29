@@ -17,6 +17,9 @@ N complete-shell
 # complete-shell sub-commands:
 
 C help      ..View full documentation
+C config    ..Show, set or get configuration values
+  A +config-keys
+  A +[true,false]
 C search    ..Find CompleteShell completion packages
   O @v @q
 C list      ..List installed packages

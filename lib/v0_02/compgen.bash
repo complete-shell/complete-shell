@@ -231,6 +231,7 @@ call-function() {
 
   : "${COMPLETE_SHELL_PATH:=${HOME:?}/.complete-shell}"
   : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_PATH/comp}"
+  : "${COMPLETE_SHELL_CONFIG:=$COMPLETE_SHELL_PATH/config/bash}"
   : "${COMPLETE_SHELL_BASH_DIR:=$COMPLETE_SHELL_PATH/bash-completion/completions}"
 
   [[ $func ]] || return 0

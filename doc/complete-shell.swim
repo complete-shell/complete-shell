@@ -9,6 +9,9 @@ Modern Tab Completion Everywhere
   git clone https://github.com/complete-shell/complete-shell
   source /path/to/complete-shell/.rc
 
+  # Turn on the cool modern features (off by default):
+  complete-shell config modern_settings true
+
   # Try tab completion:
   complete-shell <tab><tab>
 
@@ -53,6 +56,11 @@ People can easily write complete-shell files for commands that don't yet have
 completion and share them with the world. They can also write their own custom
 files, or fine tune existing ones to their liking.
 
+CompleteShell also does Bash completion like you've never seen it. It can show
+you completion descriptions, show command usage, show hints to help you along,
+and turn on the more modern Bash completion options (like pressing TAB once
+instead of twice). These things are configurable by you.
+
 = Installation
 
 Run these commands:
@@ -64,6 +72,10 @@ Run these commands:
   source /path/to/complete-shell/.rc
 
 That's it!
+
+You should also really try turning on the cool modern settings:
+
+  complete-shell config modern_settings true
 
 == Prerequisites
 
@@ -85,16 +97,26 @@ That's it!
   in `/usr/share/bash-completion/` or `/etc/bash_completion*` (older systems
   and Mac). CompleteShell will check to make sure this subsystem is in place.
 
-  For Zsh and Fish, completion facitities are first class parts of the shell.
+  For Zsh and Fish, completion facilities are first class parts of the shell.
   CompleteShell will compile to code that fits right in.
 
-= Commands
+= The `complete-shell` CLI
 
 - `complete-shell help`
 
   Display the complete-shell manpage. Same as `man complete-shell`.
 
   The `-h` option will display a quick reference help guide.
+
+- `complete-shell config [<key> [<value>]]`
+
+  With no arguments, show all settings. With 1 argument, print the value for a
+  key. With 2 arguments, set a key to a value.
+
+  Config values are stored in `$COMPLETE_SHELL_PATH/config/<shell>` (usually
+  `~/.complete-shell/config/bash`).
+
+  See "Configuration Options" below.
 
 - `complete-shell search [<search string>]`
 
@@ -154,6 +176,52 @@ That's it!
 
     alias cs=complete-shell
     complete-shell alias complete-shell cs
+
+= Configuration Options
+
+These options all default to `false`. To turn on an option:
+
+  complete-shell config <option> true
+
+- `disabled`
+
+  Disable CompleteShell tab completion altogether.
+
+- `modern_settings`
+
+  An umbrella option to always use the most modern CompleteShell settings.
+  Effectively set these to true: `single_tab`, `no_prompt`,
+  `show_descriptions`, `show_usage`, `show_hints`.
+
+- `single_tab`
+
+  Only require a single TAB press to trigger completion.
+
+- `no_prompt`
+
+  Disable prompt for more than 100 completions. When text is too big for the
+  screen it will start a pager.
+
+- `show_descriptions`
+
+  CompleteShell completions can have short descriptions. Set this option if you
+  want to see them.
+
+- `show_usage`
+
+  Some commands have a defined usage, which is helpful to have when writing the
+  command. Turn this on to see them.
+
+- `show_hints`
+
+  CompleteShell can give you hints about certain things when it thinks they'll
+  be useful. Use this to enable them.
+
+- `no_horizontal`
+
+  Recent Bash versions allow for completions to be sorted horizontally, which
+  is usually better. We turn that on for you if available. Use this to keep the
+  Bash default.
 
 = The `compdef` File
 

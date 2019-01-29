@@ -9,12 +9,20 @@
 # shellcheck shell=bash disable=1090,2034,2154
 
 #------------------------------------------------------------------------------
-# This is the entry-point function for every completion and the only function
-# that complete-shell adds to a shell environment. Its end-goal is to set the
-# COMPREPLY variable and any compopt options. It reads these values from the
-# stdout of the internal functions it calls.
+# This is the entry-point function for every complete-shell completion and the
+# only function that complete-shell adds to your Bash environment. Its goal is
+# to set the COMPREPLY variable and any compopt options. It reads these values
+# from the stdout of the internal functions it calls.
 #------------------------------------------------------------------------------
 __complete-shell:compgen() {
+  # shellcheck disable=2046
+  local $(source "$COMPLETE_SHELL_ROOT/lib/config.bash" vars)
+  source "$COMPLETE_SHELL_ROOT/lib/config.bash" get
+
+  $disabled && { _minimal; return; }
+
+  compopt -o nosort 2>/dev/null
+
   local comp_word=${COMP_WORDS[COMP_CWORD]}
   [[ $comp_word == '=' ]] && comp_word=
 
@@ -27,65 +35,62 @@ __complete-shell:compgen() {
 
   local hints=()
   while true; do
+    if [[ ! -d ${COMPLETE_SHELL_ROOT-} ]]; then
+      hints=(
+        "CompleteShell can't complete '${COMP_WORDS[0]}'. COMPLETE_SHELL_ROOT is undefined."
+        "See: https://github.com/complete-shell/complete-shell/wiki/Bash-Setup"
+      )
+      break
+    fi
 
-    if [[ -d ${COMPLETE_SHELL_ROOT-} ]]; then
-      local line comps=''
-      while IFS=$'\n' read -r line; do
-        if [[ $line =~ ^\$\  ]]; then
-          eval "${line#\$\ }"
-        elif [[ $line == \<HINT\>\ * ]]; then
-          hints+=("${line#<HINT>\ }")
-        else
-          comps+="'$line' "
-        fi
-      done <<< "$(source "$compgen_file" && "$compgen_func" "$@")"
-
-      [[ ${#hints[*]} -eq 0 ]] || break
-
-      if [[ ${BASH_VERSINFO[0]} == '3' ]]; then
-        COMPREPLY=()
-        while IFS=$'\n' read -r line; do
-          COMPREPLY+=("$line")
-        done <<< "$(compgen -W "$comps" -- "$comp_word")"
-
+    local line comps=''
+    while IFS=$'\n' read -r line; do
+      if [[ $line =~ ^\$\  ]]; then
+        eval "${line#\$\ }"
+      elif [[ $line == \<HINT\>\ * ]]; then
+        hints+=("${line#<HINT>\ }")
       else
-       IFS=$'\n' read -r -d '' -a COMPREPLY \
-         <<< "$(compgen -W "$comps" -- "$comp_word")"
+        comps+="'$line' "
+      fi
+    done <<< "$(source "$compgen_file" && "$compgen_func" "$@")"
+
+    [[ ${#hints[*]} -eq 0 ]] || break
+
+    # Note: Bash 3.2 can't `read -a` here.
+    COMPREPLY=()
+    while IFS=$'\n' read -r line; do
+      [[ $line ]] || continue
+      COMPREPLY+=("$line")
+    done <<< "$(compgen -W "$comps" -- "$comp_word")"
+
+    if [[ ${#COMPREPLY[*]} -eq 1 ]]; then
+      if [[ ${COMPREPLY[0]} == *\ \ —\ * ]]; then
+        COMPREPLY[0]=${COMPREPLY[0]%% *— *}
       fi
 
-      if [[ ${#COMPREPLY[*]} -eq 1 ]]; then
-        if [[ ${COMPREPLY[0]} == *\ \ —\ * ]]; then
-          COMPREPLY[0]=${COMPREPLY[0]%% *— *}
-        fi
+      [[ ${COMPREPLY[0]} != *= ]] &&
+      [[ $(compopt 2>/dev/null) != *-o\ filenames* ]] &&
+        COMPREPLY[0]+=' '
 
-        [[ ${COMPREPLY[0]} != *= ]] &&
-        [[ $(compopt 2>/dev/null) != *-o\ filenames* ]] &&
-          COMPREPLY[0]+=' '
-
-      else
-        local i
-        for ((i = 0; i < ${#COMPREPLY[*]}; i++)); do
-          if [[ ${COMPREPLY[i]} == *—* ]]; then
+    else
+      local i
+      for ((i = 0; i < ${#COMPREPLY[*]}; i++)); do
+        if [[ ${COMPREPLY[i]} == *—* ]]; then
+          if $show_descriptions; then
             COMPREPLY[i]=$(
               printf "%-$((COLUMNS))s" "${COMPREPLY[i]}"
             )
+          else
+            COMPREPLY[i]=${COMPREPLY[i]%% *— *}
           fi
-        done
-      fi
-
-      compopt -o nosort 2>/dev/null
-
-    else
-      hints=(
-        "CompleteShell not properly configured"
-        "See: https://github.com/complete-shell/complete-shell/wiki/Bash-Setup"
-      )
+        fi
+      done
     fi
 
     break
   done
 
-  if [[ ${#hints[*]} -gt 0 ]]; then
+  if [[ ${#hints[*]} -gt 0 ]] && $show_hints; then
     COMPREPLY=()
 
     local hint
@@ -95,21 +100,11 @@ __complete-shell:compgen() {
     done
 
     COMPREPLY+=(' ')
-
-    # bind "set completion-display-width ${COLUMNS:-'-1'}"
-
-    compopt -o nosort 2>/dev/null
   fi
 
   return 0
 }
 
-if [[ ${BASH_VERSINFO[0]} != '3' ]]; then
-  bind 'set print-completions-horizontally on' 2>/dev/null
-fi
-bind 'set completion-query-items 0' 2>/dev/null
-bind 'set show-all-if-ambiguous on' 2>/dev/null
-bind 'set show-all-if-unmodified on' 2>/dev/null
 
 #------------------------------------------------------------------------------
 # Completion debugging helper:
