@@ -4,7 +4,7 @@
 
 set -eu -o pipefail
 
-COMPLETE_SHELL_VERSION=0.2.6
+COMPLETE_SHELL_VERSION=0.2.7
 
 IFS=' '$'\t'$'\n'
 

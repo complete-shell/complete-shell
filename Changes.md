@@ -1,3 +1,6 @@
+## v0.2.7   2019/01/30
+- Fix a small mistake/typo
+
 ## v0.2.6   2019/01/30
 - Use `COMPLETE_SHELL_BASE` instead of `COMPLETE_SHELL_PATH`
 - `COMPLETE_SHELL_PATH` wil be a real PATH var for completion lookup
