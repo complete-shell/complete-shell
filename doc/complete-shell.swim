@@ -113,7 +113,7 @@ You should also really try turning on the cool modern settings:
   With no arguments, show all settings. With 1 argument, print the value for a
   key. With 2 arguments, set a key to a value.
 
-  Config values are stored in `$COMPLETE_SHELL_PATH/config/<shell>` (usually
+  Config values are stored in `$COMPLETE_SHELL_BASE/config/<shell>` (usually
   `~/.complete-shell/config/bash`).
 
   See "Configuration Options" below.
@@ -222,6 +222,61 @@ These options all default to `false`. To turn on an option:
   Recent Bash versions allow for completions to be sorted horizontally, which
   is usually better. We turn that on for you if available. Use this to keep the
   Bash default.
+
+= Environment Variables
+
+CompleteShell has environment variables that you can use to customize various
+things. Usually you don't need to worry about these at all.
+
+- `COMPLETE_SHELL_ROOT`
+
+  The location of the complete-shell software being used.
+
+  This variable is required and set automatically for you at shell startup.
+
+  If you use `source /path/to/complete-shell/.rc` to enable complete-shell, it
+  is set to `/path/to/complete-shell`.
+
+- `COMPLETE_SHELL_BASE`
+
+  The directory where your completions are installed and your configuration
+  lives.
+
+  Defaults to the last directory in `COMPLETE_SHELL_PATH`.
+
+- `COMPLETE_SHELL_PATH`
+
+  A colon separated path variable for finding installed completions.
+
+  Defaults to `$HOME/.complete-shell`
+
+- `COMPLETE_SHELL_CONFIG`
+
+  Your config file, managed by `complete-shell config ...`.
+
+  Defaults to `$COMPLETE_SHELL_BASE/config/$COMPLETE_SHELL_SHELL`.
+
+- `COMPLETE_SHELL_COMP`
+
+  Directory where installed completions go.
+
+  Defaults to `$COMPLETE_SHELL_BASE/comp`.
+
+- `COMPLETE_SHELL_SRC`
+
+  Directory where completion source repositories are installed (cloned) into.
+
+  Defaults to `$COMPLETE_SHELL_BASE/src`.
+
+- `COMPLETE_SHELL_BASH_DIR`
+
+  Directory where completions are compiled into (for Bash).
+
+  Defaults to `$COMPLETE_SHELL_BASE/bash-completion/completions`.
+
+- `COMPLETE_SHELL_SHELL`
+
+  Your shell. ('bash', 'zsh', 'fish').
 
 = The `compdef` File
 

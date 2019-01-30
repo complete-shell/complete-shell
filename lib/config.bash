@@ -22,7 +22,7 @@ if [[ ${1-} == vars ]]; then
 fi
 
 get-config() {
-  config_file=${COMPLETE_SHELL_CONFIG:-${COMPLETE_SHELL_PATH:-$HOME/.complete-shell}/config/bash}
+  config_file=${COMPLETE_SHELL_CONFIG:-${COMPLETE_SHELL_BASE:-$HOME/.complete-shell}/config/bash}
 
   [[ -f $config_file ]] &&
     source "$config_file"

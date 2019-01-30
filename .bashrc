@@ -41,7 +41,7 @@ source "$COMPLETE_SHELL_ROOT/lib/complete-shell.bash"
 # Import the function called by all compdefs:
 source "$COMPLETE_SHELL_ROOT/lib/compgen.bash"
 
-# Make sure the COMPLETE_SHELL_PATH directory is setup.
+# Make sure the COMPLETE_SHELL_BASE directory is setup.
 # This is where all the compdef files and your config file reside.
 # This is typically ~/.complete-shell/  (default)
 COMPLETE_SHELL_SHELL=bash \
@@ -50,6 +50,6 @@ COMPLETE_SHELL_SHELL=bash \
 # Save the current readline values before changing them:
 bind -v |
   grep -E ' (print-completions-horizontally|completion-query-items|show-all-if-ambiguous|show-all-if-unmodified) ' \
-  > "${COMPLETE_SHELL_PATH:-$HOME/.complete-shell}/.defaults"
+  > "${COMPLETE_SHELL_BASE:-$HOME/.complete-shell}/.defaults"
 
 source "$COMPLETE_SHELL_ROOT/lib/config.bash" apply

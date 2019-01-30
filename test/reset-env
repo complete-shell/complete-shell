@@ -43,7 +43,7 @@ else
 
   rm -fr _complete-shell
 
-  export COMPLETE_SHELL_PATH=$PWD/_complete-shell
+  export COMPLETE_SHELL_BASE=$PWD/_complete-shell
   source ../.rc test
 
   alias cs=complete-shell

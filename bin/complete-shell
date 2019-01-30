@@ -105,7 +105,7 @@ complete-shell:config() {
     text=$(grep -Ev "^$1=" "$COMPLETE_SHELL_CONFIG")
     [[ $2 ]] && text+=$'\n'"$1=$2"
     echo "$text" > "$COMPLETE_SHELL_CONFIG"
-    touch "$COMPLETE_SHELL_PATH/_config"
+    touch "$COMPLETE_SHELL_BASE/_config"
 
   else
     die "Too many aruments for 'complete-shell config'"
@@ -184,7 +184,7 @@ complete-shell:install() {
     die "Invalid complete-shell install name: '$name'"
 
   read -r name from branch path cmds <<<"$line"
-  local repo_path="$COMPLETE_SHELL_PATH/src/$name"
+  local repo_path="$COMPLETE_SHELL_SRC/$name"
 
   if [[ -d $repo_path ]]; then
     (
@@ -417,13 +417,13 @@ complete-shell:init() {
     temp=$(mktemp -d)
     (
       set -x
-      mv "$COMPLETE_SHELL_PATH" "$temp"
+      mv "$COMPLETE_SHELL_BASE" "$temp"
     )
     echo
   fi
 
-  if [[ -d $COMPLETE_SHELL_PATH ]]; then
-    say "'$COMPLETE_SHELL_PATH' already initialized"
+  if [[ -d $COMPLETE_SHELL_BASE ]]; then
+    say "'$COMPLETE_SHELL_BASE' already initialized"
     return
   fi
 
@@ -446,7 +446,7 @@ complete-shell:init() {
 
   remake complete-shell
 
-  say "Initialized '$COMPLETE_SHELL_PATH'"
+  say "Initialized '$COMPLETE_SHELL_BASE'"
 }
 
 BASH_CONFIG_TEXT="\
@@ -461,15 +461,15 @@ BASH_CONFIG_TEXT="\
 remake() {
   comp=${1##*/}
   comp=${comp%.comp}
-  mkdir -p "$COMPLETE_SHELL_PATH/_remake"
-  touch "$COMPLETE_SHELL_PATH/_remake/$comp"
+  mkdir -p "$COMPLETE_SHELL_BASE/_remake"
+  touch "$COMPLETE_SHELL_BASE/_remake/$comp"
 }
 
 disable() {
   comp=${1##*/}
   comp=${comp%.comp}
-  mkdir -p "$COMPLETE_SHELL_PATH/_disable"
-  touch "$COMPLETE_SHELL_PATH/_disable/$comp"
+  mkdir -p "$COMPLETE_SHELL_BASE/_disable"
+  touch "$COMPLETE_SHELL_BASE/_disable/$comp"
 }
 
 get-output-dir() {
@@ -498,11 +498,19 @@ die() { for line; do echo "$line" >&2; done; exit 1; }
 
 #------------------------------------------------------------------------------
 check-env() {
+  if [[ -z ${COMPLETE_SHELL_SHELL-} ]]; then
+    if [[ $BASH_VERSION ]]; then COMPLETE_SHELL_SHELL=bash
+    elif [[ $ZSH_VERSION ]]; then COMPLETE_SHELL_SHELL=zsh
+    elif [[ $FISH_VERSION ]]; then COMPLETE_SHELL_SHELL=zsh
+    else die "Unsupported shell"
+    fi
+  fi
   : "${COMPLETE_SHELL_PATH:=$HOME/.complete-shell}"
-  : "${COMPLETE_SHELL_CONFIG:=$COMPLETE_SHELL_PATH/config/${COMPLETE_SHELL_SHELL:?}}"
-  : "${COMPLETE_SHELL_SRC:=$COMPLETE_SHELL_PATH/src}"
-  : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_PATH/comp}"
-  : "${COMPLETE_SHELL_BASH_DIR:=$COMPLETE_SHELL_PATH/bash-completion/completions}"
+  : "${COMPLETE_SHELL_BASE:=${COMPLETE_SHELL_PATH##*:}}"
+  : "${COMPLETE_SHELL_CONFIG:=$COMPLETE_SHELL_BASE/config/$COMPLETE_SHELL_SHELL}"
+  : "${COMPLETE_SHELL_SRC:=$COMPLETE_SHELL_BASE/src}"
+  : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_BASE/comp}"
+  : "${COMPLETE_SHELL_BASH_DIR:=$COMPLETE_SHELL_BASE/bash-completion/completions}"
   : "${COMPLETE_SHELL_SHARE:=$COMPLETE_SHELL_ROOT/share}"
   : "${COMPLETE_SHELL_INDEX:=$COMPLETE_SHELL_SHARE/search-index.tsv}"
 

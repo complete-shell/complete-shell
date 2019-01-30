@@ -37,14 +37,15 @@ fi
 if command -v _init_completion &>/dev/null; then
   # Put COMPLETE_SHELL_PATH in XDG_DATA_DIRS for bash_completion auto load:
   __complete_shell_path=${COMPLETE_SHELL_PATH:-$HOME/.complete-shell}
+  __complete_shell_base=${COMPLETE_SHELL_BASE:${__complete_shell_path##*:}}
   __complete_shell_xdg=${XDG_DATA_DIRS:=/usr/local/share:/usr/share}
 
   xdg_data_dirs=$XDG_DATA_DIRS
-  if [[ $__complete_shell_xdg != *$__complete_shell_path:* ]]; then
-    xdg_data_dirs=$__complete_shell_path:$__complete_shell_xdg
+  if [[ $__complete_shell_xdg != *$__complete_shell_base:* ]]; then
+    xdg_data_dirs=$__complete_shell_base:$__complete_shell_xdg
   fi
 
-  unset __complete_shell_path __complete_shell_xdg
+  unset __complete_shell_path __complete_shell_base __complete_shell_xdg
 fi
 
 # Check for bash-completion 2.6+

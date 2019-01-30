@@ -6,9 +6,10 @@ complete-shell() {
 
   local COMPLETE_SHELL_SHELL=bash
   local COMPLETE_SHELL_PATH=${COMPLETE_SHELL_PATH:-${HOME:?}/.complete-shell}
-  local COMPLETE_SHELL_SRC=${COMPLETE_SHELL_SRC:-$COMPLETE_SHELL_PATH/src}
-  local COMPLETE_SHELL_COMP=${COMPLETE_SHELL_COMP:-$COMPLETE_SHELL_PATH/comp}
-  local COMPLETE_SHELL_BASH_DIR=${COMPLETE_SHELL_BASH_DIR:-$COMPLETE_SHELL_PATH/bash-completion/completions}
+  local COMPLETE_SHELL_BASE=${COMPLETE_SHELL_BASE:-${COMPLETE_SHELL_PATH##*:}}
+  local COMPLETE_SHELL_SRC=${COMPLETE_SHELL_SRC:-$COMPLETE_SHELL_BASE/src}
+  local COMPLETE_SHELL_COMP=${COMPLETE_SHELL_COMP:-$COMPLETE_SHELL_BASE/comp}
+  local COMPLETE_SHELL_BASH_DIR=${COMPLETE_SHELL_BASH_DIR:-$COMPLETE_SHELL_BASE/bash-completion/completions}
 
   local cmd=$1
 
@@ -17,7 +18,7 @@ complete-shell() {
     "${COMPLETE_SHELL_ROOT:?}/bin/complete-shell" "$@" || return
 
   # Check for things to do in the local shell:
-  local remake=$COMPLETE_SHELL_PATH/_remake
+  local remake=$COMPLETE_SHELL_BASE/_remake
   if [[ -d $remake ]]; then
     # shellcheck disable=2046,2035
     set -- $(cd "$remake" && echo *)
@@ -34,7 +35,7 @@ complete-shell() {
     rm -fr "$remake"
   fi
 
-  local disable=$COMPLETE_SHELL_PATH/_disable
+  local disable=$COMPLETE_SHELL_BASE/_disable
   if [[ -d $disable ]]; then
     # shellcheck disable=2046,2035
     set -- $(cd "$disable" && echo *)
@@ -46,21 +47,21 @@ complete-shell() {
     rm -fr "$disable"
   fi
 
-  local config=$COMPLETE_SHELL_PATH/_config
+  local config=$COMPLETE_SHELL_BASE/_config
   if [[ -f $config ]]; then
     rm -f "$config"
 
     local line
     while read -r line; do
       bind "$line"
-    done < "$COMPLETE_SHELL_PATH/.defaults"
+    done < "$COMPLETE_SHELL_BASE/.defaults"
 
     source "$COMPLETE_SHELL_ROOT/lib/config.bash" apply
   fi
 
   if [[ $cmd == @(init|add) ]]; then
     if [[ ${BASH_VERSINFO[0]} == '3' ]]; then
-      set -- "$COMPLETE_SHELL_PATH"/bash-completion/completions/*.bash
+      set -- "$COMPLETE_SHELL_BASE"/bash-completion/completions/*.bash
       for comp; do
         source "$comp"
       done

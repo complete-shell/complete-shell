@@ -137,7 +137,7 @@ The C<-h> option will display a quick reference help guide.
 With no arguments, show all settings. With 1 argument, print the value for a
 key. With 2 arguments, set a key to a value.
 
-Config values are stored in C<< $COMPLETE_SHELL_PATH/config/<shell> >>
+Config values are stored in C<< $COMPLETE_SHELL_BASE/config/<shell> >>
 (usually C<~/.complete-shell/config/bash>).
 
 See "Configuration Options" below.
@@ -249,6 +249,65 @@ be useful. Use this to enable them.
 Recent Bash versions allow for completions to be sorted horizontally, which is
 usually better. We turn that on for you if available. Use this to keep the
 Bash default.
+
+=back
+
+=head1 Environment Variables
+
+CompleteShell has environment variables that you can use to customize various
+things. Usually you don't need to worry about these at all.
+
+=over
+
+=item C<COMPLETE_SHELL_ROOT>
+
+The location of the complete-shell software being used.
+
+This variable is required and set automatically for you at shell startup.
+
+If you use C<source /path/to/complete-shell/.rc> to enable complete-shell, it
+is set to C</path/to/complete-shell>.
+
+=item C<COMPLETE_SHELL_BASE>
+
+The directory where your completions are installed and your
+configuration lives.
+
+Defaults to the last directory in C<COMPLETE_SHELL_PATH>.
+
+=item C<COMPLETE_SHELL_PATH>
+
+A colon separated path variable for finding installed completions.
+
+Defaults to C<$HOME/.complete-shell>
+
+=item C<COMPLETE_SHELL_CONFIG>
+
+Your config file, managed by C<complete-shell config ...>.
+
+Defaults to C<$COMPLETE_SHELL_BASE/config/$COMPLETE_SHELL_SHELL>.
+
+=item C<COMPLETE_SHELL_COMP>
+
+Directory where installed completions go.
+
+Defaults to C<$COMPLETE_SHELL_BASE/comp>.
+
+=item C<COMPLETE_SHELL_SRC>
+
+Directory where completion source repositories are installed (cloned) into.
+
+Defaults to C<$COMPLETE_SHELL_BASE/src>.
+
+=item C<COMPLETE_SHELL_BASH_DIR>
+
+Directory where completions are compiled into (for Bash).
+
+Defaults to C<$COMPLETE_SHELL_BASE/bash-completion/completions>.
+
+=item C<COMPLETE_SHELL_SHELL>
+
+Your shell. ('bash', 'zsh', 'fish').
 
 =back
 

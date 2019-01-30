@@ -181,7 +181,7 @@ The \f(CW\*(C`\-h\*(C'\fR option will display a quick reference help guide.
 .IX Item "complete-shell config [<key> [<value>]]"
 With no arguments, show all settings. With 1 argument, print the value for a key. With 2 arguments, set a key to a value.
 .Sp
-Config values are stored in \f(CW\*(C`$COMPLETE_SHELL_PATH/config/<shell>\*(C'\fR (usually \f(CW\*(C`~/.complete\-shell/config/bash\*(C'\fR).
+Config values are stored in \f(CW\*(C`$COMPLETE_SHELL_BASE/config/<shell>\*(C'\fR (usually \f(CW\*(C`~/.complete\-shell/config/bash\*(C'\fR).
 .Sp
 See \*(L"Configuration Options\*(R" below.
 .ie n .IP """complete\-shell search [<search string>]""" 4
@@ -275,6 +275,57 @@ CompleteShell can give you hints about certain things when it thinks they'll be 
 .el .IP "\f(CWno_horizontal\fR" 4
 .IX Item "no_horizontal"
 Recent Bash versions allow for completions to be sorted horizontally, which is usually better. We turn that on for you if available. Use this to keep the Bash default.
+.SH "Environment Variables"
+.IX Header "Environment Variables"
+CompleteShell has environment variables that you can use to customize various things. Usually you don't need to worry about these at all.
+.ie n .IP """COMPLETE_SHELL_ROOT""" 4
+.el .IP "\f(CWCOMPLETE_SHELL_ROOT\fR" 4
+.IX Item "COMPLETE_SHELL_ROOT"
+The location of the complete-shell software being used.
+.Sp
+This variable is required and set automatically for you at shell startup.
+.Sp
+If you use \f(CW\*(C`source /path/to/complete\-shell/.rc\*(C'\fR to enable complete-shell, it is set to \f(CW\*(C`/path/to/complete\-shell\*(C'\fR.
+.ie n .IP """COMPLETE_SHELL_BASE""" 4
+.el .IP "\f(CWCOMPLETE_SHELL_BASE\fR" 4
+.IX Item "COMPLETE_SHELL_BASE"
+The directory where your completions are installed and your configuration lives.
+.Sp
+Defaults to the last directory in \f(CW\*(C`COMPLETE_SHELL_PATH\*(C'\fR.
+.ie n .IP """COMPLETE_SHELL_PATH""" 4
+.el .IP "\f(CWCOMPLETE_SHELL_PATH\fR" 4
+.IX Item "COMPLETE_SHELL_PATH"
+A colon separated path variable for finding installed completions.
+.Sp
+Defaults to \f(CW\*(C`$HOME/.complete\-shell\*(C'\fR
+.ie n .IP """COMPLETE_SHELL_CONFIG""" 4
+.el .IP "\f(CWCOMPLETE_SHELL_CONFIG\fR" 4
+.IX Item "COMPLETE_SHELL_CONFIG"
+Your config file, managed by \f(CW\*(C`complete\-shell config ...\*(C'\fR.
+.Sp
+Defaults to \f(CW\*(C`$COMPLETE_SHELL_BASE/config/$COMPLETE_SHELL_SHELL\*(C'\fR.
+.ie n .IP """COMPLETE_SHELL_COMP""" 4
+.el .IP "\f(CWCOMPLETE_SHELL_COMP\fR" 4
+.IX Item "COMPLETE_SHELL_COMP"
+Directory where installed completions go.
+.Sp
+Defaults to \f(CW\*(C`$COMPLETE_SHELL_BASE/comp\*(C'\fR.
+.ie n .IP """COMPLETE_SHELL_SRC""" 4
+.el .IP "\f(CWCOMPLETE_SHELL_SRC\fR" 4
+.IX Item "COMPLETE_SHELL_SRC"
+Directory where completion source repositories are installed (cloned) into.
+.Sp
+Defaults to \f(CW\*(C`$COMPLETE_SHELL_BASE/src\*(C'\fR.
+.ie n .IP """COMPLETE_SHELL_BASH_DIR""" 4
+.el .IP "\f(CWCOMPLETE_SHELL_BASH_DIR\fR" 4
+.IX Item "COMPLETE_SHELL_BASH_DIR"
+Directory where completions are compiled into (for Bash).
+.Sp
+Defaults to \f(CW\*(C`$COMPLETE_SHELL_BASE/bash\-completion/completions\*(C'\fR.
+.ie n .IP """COMPLETE_SHELL_SHELL""" 4
+.el .IP "\f(CWCOMPLETE_SHELL_SHELL\fR" 4
+.IX Item "COMPLETE_SHELL_SHELL"
+Your shell. ('bash', 'zsh', 'fish').
 .ie n .SH "The ""compdef"" File"
 .el .SH "The \f(CWcompdef\fP File"
 .IX Header "The compdef File"

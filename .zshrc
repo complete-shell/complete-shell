@@ -29,7 +29,7 @@ source "$COMPLETE_SHELL_ROOT/lib/complete-shell.zsh"
 # Import the function called by all compdefs:
 source "$COMPLETE_SHELL_ROOT/lib/compgen.zsh"
 
-# Make sure the COMPLETE_SHELL_PATH directory is setup.
+# Make sure the COMPLETE_SHELL_BASE directory is setup.
 # This is where all the compdef files and your config file reside.
 # This is typically ~/.complete-shell/  (default)
 complete-shell init --quiet
