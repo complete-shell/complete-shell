@@ -1,3 +1,7 @@
+## v0.2.6   2019/01/30
+- Use `COMPLETE_SHELL_BASE` instead of `COMPLETE_SHELL_PATH`
+- `COMPLETE_SHELL_PATH` wil be a real PATH var for completion lookup
+
 ## v0.2.5   2019/01/29
 - Support config file and settings
 - Default to current Bash settings
