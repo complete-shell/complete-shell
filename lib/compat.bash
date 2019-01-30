@@ -35,9 +35,9 @@ fi
 
 # For 2.1+ set up XDG_DATA_DIRS with complete-shell for dynamic loading:
 if command -v _init_completion &>/dev/null; then
-  # Put COMPLETE_SHELL_PATH in XDG_DATA_DIRS for bash_completion auto load:
+  # Put COMPLETE_SHELL_BASE in XDG_DATA_DIRS for bash_completion auto load:
   __complete_shell_path=${COMPLETE_SHELL_PATH:-$HOME/.complete-shell}
-  __complete_shell_base=${COMPLETE_SHELL_BASE:${__complete_shell_path##*:}}
+  __complete_shell_base=${COMPLETE_SHELL_BASE:-${__complete_shell_path##*:}}
   __complete_shell_xdg=${XDG_DATA_DIRS:=/usr/local/share:/usr/share}
 
   xdg_data_dirs=$XDG_DATA_DIRS
