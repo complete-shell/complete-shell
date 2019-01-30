@@ -1,3 +1,6 @@
+## v0.2.8   2019/01/30
+- Put .defaults cache file under config dir
+
 ## v0.2.7   2019/01/30
 - Fix a small mistake/typo
 

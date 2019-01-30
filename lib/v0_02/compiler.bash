@@ -3,7 +3,7 @@
 compiler:init() {
   PATH=${COMPLETE_SHELL_ROOT:?}/lib source 'array.bash'
 
-  version='v0.2.7'
+  version='v0.2.8'
   api_version='v0_02'
 
   cmd_name=01
