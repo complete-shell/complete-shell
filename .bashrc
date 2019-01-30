@@ -47,9 +47,18 @@ source "$COMPLETE_SHELL_ROOT/lib/compgen.bash"
 COMPLETE_SHELL_SHELL=bash \
   complete-shell init --quiet
 
-# Save the current readline values before changing them:
-bind -v |
-  grep -E ' (print-completions-horizontally|completion-query-items|show-all-if-ambiguous|show-all-if-unmodified) ' \
-  > "${COMPLETE_SHELL_BASE:-$HOME/.complete-shell}/.defaults"
+save-readline-settings() {
+  local COMPLETE_SHELL_PATH=${COMPLETE_SHELL_PATH:-$HOME/.complete-shell}
+  local COMPLETE_SHELL_BASE=${COMPLETE_SHELL_BASE:-${COMPLETE_SHELL_PATH##*:}}
+  local COMPLETE_SHELL_CONFIG=${COMPLETE_SHELL_CONFIG:-$COMPLETE_SHELL_BASE/config/bash}
+
+  # Save the current readline values before changing them:
+  bind -v |
+    grep -E ' (print-completions-horizontally|completion-query-items|show-all-if-ambiguous|show-all-if-unmodified) ' \
+    > "${COMPLETE_SHELL_CONFIG%/*}/.defaults"
+}
+save-readline-settings
+unset -f save-readline-settings
+
 
 source "$COMPLETE_SHELL_ROOT/lib/config.bash" apply
