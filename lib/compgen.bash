@@ -64,7 +64,7 @@ __complete-shell:compgen() {
     done <<< "$(compgen -W "$comps" -- "$comp_word")"
 
     if [[ ${#COMPREPLY[*]} -eq 1 ]]; then
-      if [[ ${COMPREPLY[0]} == *\ \ —\ * ]]; then
+      if [[ ${COMPREPLY[0]} == *\ —\ * ]]; then
         COMPREPLY[0]=${COMPREPLY[0]%% *— *}
       fi
 

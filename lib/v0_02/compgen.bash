@@ -135,7 +135,7 @@ complete-option-names() {
 
     odi=$od"[$i]"
     if [[ ${!odi} ]]; then
-      printf "%-${l}s  — %s\n" "$o$eq" "${!odi}"
+      printf "%-${l}s — %s\n" "$o$eq" "${!odi}"
     else
       echo "$o$eq"
     fi
@@ -177,8 +177,6 @@ complete-option-values() {
 
   local init_flags='-s'
   call-function "$func"
-
-  return 0
 }
 
 complete-sub-commands() {
@@ -192,7 +190,7 @@ complete-sub-commands() {
   for ((i = 1; i < ${#sub_cmds[*]}; i++)); do
     desc=cmd_desc_$i
     if [[ ${!desc} ]]; then
-      printf "%-${l}s  — %s\n" "${sub_cmds[i]}" "${!desc}"
+      printf "%-${l}s — %s\n" "${sub_cmds[i]}" "${!desc}"
     else
       printf "%s\n" "${sub_cmds[i]}"
     fi
