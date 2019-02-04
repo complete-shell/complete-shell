@@ -216,24 +216,25 @@ complete-arguments() {
   set -- "${!var}"
 
   index=${#comp_args[*]}
-  (( index = index - 1 ))
+  func=${!index}
 
-  var="arg_type${n}[$index]"
-  func=${!var}
+  [[ -z "$func" ]] &&
+    [[ ${!#} == *+ ]] &&
+    func=${!#}
 
-  call-function "$func"
+  call-function "${func%+}"
 }
 
 call-function() {
   func=$1
+
+  [[ $func ]] || return 0
 
   : "${COMPLETE_SHELL_PATH:=${HOME:?}/.complete-shell}"
   : "${COMPLETE_SHELL_BASE:=${COMPLETE_SHELL_PATH##*:}}"
   : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_BASE/comp}"
   : "${COMPLETE_SHELL_CONFIG:=$COMPLETE_SHELL_BASE/config/bash}"
   : "${COMPLETE_SHELL_BASH_DIR:=$COMPLETE_SHELL_BASE/bash-completion/completions}"
-
-  [[ $func ]] || return 0
 
   local pattern=''
   if [[ $func =~ (.*)=(.*) ]]; then
