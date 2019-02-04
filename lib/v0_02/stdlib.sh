@@ -10,7 +10,26 @@
 # complete-shell standard library
 #------------------------------------------------------------------------------
 
-# shellcheck shell=sh disable=2034,2039,2086,2154
+# shellcheck shell=sh disable=2030,2031,2034,2039,2086,2154
+
+cmd() (
+  _command
+
+  # Remove extra space from single completion:
+  if [[ ${#COMPREPLY[*]} -eq 1 ]]; then
+    COMPREPLY[0]=${COMPREPLY[0]% }
+  fi
+
+  printf "%s\n" "${COMPREPLY[@]}"
+
+  # Repeat compopt settings:
+  while [[ $(compopt) =~ -o\ ([^\ ]+) ]]; do
+    compopt +o "${BASH_REMATCH[1]}"
+    echo "$ compopt -o ${BASH_REMATCH[1]}"
+  done
+
+  return 0
+)
 
 file() (
   if [[ ${pattern-} == \** &&
