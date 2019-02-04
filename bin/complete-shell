@@ -402,8 +402,7 @@ complete-shell:compile() {
 
       else
         dir=$(get-output-dir)
-        name=${comp_file%.comp}
-        name=${name##*/}
+        name=$command_name
         out="$dir/$name.$format"
       fi
 

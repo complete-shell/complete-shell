@@ -22,6 +22,8 @@ N() {
   name=$1
   shift
 
+  command_name=$name
+
   n=0
   num=0000
 
@@ -214,7 +216,7 @@ $bash_function_code
   cat <<...
 }
 
-complete -o nospace -F "_$name" "\$(name="\${BASH_SOURCE[0]##*/}"; echo "\${name%.bash}")"
+complete -o nospace -F "_$name" "$name"
 ...
 }
 
