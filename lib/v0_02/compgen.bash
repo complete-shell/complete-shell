@@ -183,11 +183,11 @@ complete-sub-commands() {
   [[ ${#sub_cmds[*]} -gt 0 && -z $comp_scmd ]] || return 1
 
   l=-1
-  for ((i = 1; i < ${#sub_cmds[*]}; i++)); do
+  for ((i = 1; i <= ${#sub_cmds[*]}; i++)); do
     (( ${#sub_cmds[i]} > l )) && l=${#sub_cmds[i]}
   done
 
-  for ((i = 1; i < ${#sub_cmds[*]}; i++)); do
+  for ((i = 1; i <= ${#sub_cmds[*]}; i++)); do
     desc=cmd_desc_$i
     if [[ ${!desc} ]]; then
       printf "%-${l}s — %s\n" "${sub_cmds[i]}" "${!desc}"
