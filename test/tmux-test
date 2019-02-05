@@ -4,14 +4,7 @@ set -eu -o pipefail
 
 pause=0.2
 
-end() {
-  set +x;
-}
-trap end EXIT
-
 main() {
-  #set -x
-
   while true; do
     clear
     setup "$@"

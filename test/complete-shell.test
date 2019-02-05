@@ -5,3 +5,5 @@ g\t
 complete-shell compile --t\t
 \t
 f\t
+
+complete-shell alias \t

@@ -11,7 +11,7 @@ default:
 test:
 	shellcheck .rc
 	shellcheck .bashrc
-	@for file in $$(find . | grep 'sh$$' | grep -v '/\.git/'); do \
+	@for file in $$(find . | grep -E '\.(bash|sh)$$' | grep -v '/\.git/'); do \
  	    echo "shellcheck $$file"; \
  	    shellcheck $$file; \
  	done
