@@ -144,7 +144,7 @@ emit-bash() {
 
 # shellcheck shell=bash disable=2034
 
-_$name() {
+_$name () {
   local complete_shell_version=$version
   local complete_shell_api_version=$api_version
 
