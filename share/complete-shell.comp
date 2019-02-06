@@ -2,54 +2,51 @@
 CompleteShell v0.2
 
 # Common reusable variables:
-V @v = O -v --verbose ..More information in output
-V @q = O -q --quiet   ..Quieter output
+V @v = O -v --verbose   ..More information in output
+V @q = O -q --quiet     ..Quieter output
 
 # Name of command to define completion for:
 N complete-shell
   # Command level options:
-  O -h --help \
-            ..Show the command summary
-  O --version \
-            ..Show the complete-shell version
-  O -x      ..Debug - Turn on Bash trace \(set -x\) output
+  O -h --help           ..Show the command summary
+  O --version           ..Show the complete-shell version
+  O -x                  ..'Debug - Turn on Bash trace (set -x) output'
 
 # complete-shell sub-commands:
 
-C help      ..View full documentation
-C config    ..Show, set or get configuration values
+C help                  ..View full documentation
+C config                ..Show, set or get configuration values
   A +config-keys
   A +[true,false]
-C search    ..Find CompleteShell completion packages
+C search                ..Find CompleteShell completion packages
   O @v @q
-C list      ..List installed packages
+  A +'Enter a search string or (nothing for all results)'
+C list                  ..List installed packages
   O @v @q
-C show      ..Show information about a package
+C show                  ..Show information about a package
   A +installed
-C install   ..Install packages
+C install               ..Install packages
   O @v @q
   A +all-compgens
-C add       ..Add a local completion definition
+C add                   ..Add a local completion definition
   A +file=*.comp
-C delete    ..Delete a completion definition
+C delete                ..Delete a completion definition
   A +installed
-C disable   ..Disable a completion definition
+C disable               ..Disable a completion definition
   A +enabled
-C enable    ..Re-enable a disabled definition
+C enable                ..Re-enable a disabled definition
   A +disabled
-C update    ..Update packages
+C update                ..Update packages
   A +installed
-C upgrade   ..Upgrade complete-shell software
-C remake +enabled \
-            ..Rebuild changed completions
-C compile   ..Compile or recompile a package
-  O -t --to =[bash,zsh,fish] \
-              ..Compiler target shell
-  O -o --outdir =dir \
-              ..Compiler output directory
-  O -p --print \
-              .. Compiler output to stdout
-  A +file
-C alias     ..Create a completion alias for a command
+C upgrade               ..Upgrade complete-shell software
+C remake                ..Rebuild changed completions
+  A +enabled
+C compile               ..Compile or recompile a package
+  O -t --to =[bash,zsh,fish]        ..Compiler target shell
+  O -o --outdir =dir                ..Compiler output directory
+  O -p --print                      ..Compiler output to stdout
+  A +file=*.comp
+C alias                 ..Create a completion alias for a command
   A +installed
-C init      ..Initialize your ~/.complete-shell env
+  A +'Enter an alias word here'
+C init                  ..Initialize your ~/.complete-shell env

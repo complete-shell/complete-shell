@@ -443,10 +443,8 @@ complete-shell:init() {
 
   (
     cd "$COMPLETE_SHELL_COMP" || exit 1
-    ln -s "$COMPLETE_SHELL_ROOT/share/complete-shell.comp" \
-      ./complete-shell.comp
-    ln -s "$COMPLETE_SHELL_ROOT/share/complete-shell.bash" \
-      ./complete-shell.bash
+    ln -fs "$COMPLETE_SHELL_ROOT/share/complete-shell.comp"
+    ln -fs "$COMPLETE_SHELL_ROOT/share/complete-shell.bash"
   )
 
   remake complete-shell
