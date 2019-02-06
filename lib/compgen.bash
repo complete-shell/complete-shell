@@ -50,6 +50,7 @@ __complete-shell:compgen() {
       elif [[ $line == \<HINT\>\ * ]]; then
         hints+=("${line#<HINT>\ }")
       else
+        line=${line//\'/\'\"\'\"\'}
         comps+="'$line' "
       fi
     done <<< "$(source "$compgen_file" && "$compgen_func" "$@")"
