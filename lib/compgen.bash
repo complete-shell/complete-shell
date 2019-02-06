@@ -91,6 +91,10 @@ __complete-shell:compgen() {
     break
   done
 
+  if [[ $comp_word =~ (.*:) ]]; then
+    COMPREPLY=("${COMPREPLY[@]#${BASH_REMATCH[1]}}")
+  fi
+
   if [[ ${#hints[*]} -gt 0 ]] && $show_hints; then
     COMPREPLY=()
 
