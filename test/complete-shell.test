@@ -1,9 +1,10 @@
-complete-shell \t
-up\t
-g\t
+complete-shell config modern_settings "''"\n
+complete-shell c\t\tn\tm\tt\t\n
+complete-shell alias \t\tcs\n
+cs()(complete-shell "$@")\n
 
-complete-shell compile --t\t
-\t
-f\t
+cs compile --t\t\tf\t--\tp\t
+_\t
+comp/\t
 
-complete-shell alias \t
+cs sea\t\t\n
