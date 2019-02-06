@@ -222,6 +222,9 @@ complete-shell:add() {
       die "--symlink not yet implemented"
     else
       cp "$comp_file" "$COMPLETE_SHELL_COMP/"
+      bash_file=${comp_file%.comp}.bash
+      [[ -f $bash_file ]] &&
+        cp "$bash_file" "$COMPLETE_SHELL_COMP/"
       remake "$comp_file"
     fi
   done
