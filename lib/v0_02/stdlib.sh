@@ -12,6 +12,10 @@
 
 # shellcheck shell=sh disable=2030,2031,2034,2039,2086,2154
 
+str() {
+  hint 'Enter a string'
+}
+
 cmd() (
   _command
 
