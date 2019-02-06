@@ -1,2 +1,3 @@
 "name"	"from"	"branch"	"path"	"cmds"
+cpanm	https://github.com/complete-shell/complete-cpanm	master	.	cpanm
 prove	https://github.com/complete-shell/complete-prove	master	.	prove
