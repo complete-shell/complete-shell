@@ -230,6 +230,11 @@ call-function() {
 
   [[ $func ]] || return 0
 
+  if [[ $func == *\ * ]]; then
+    hint "$func"
+    return 0
+  fi
+
   : "${COMPLETE_SHELL_PATH:=${HOME:?}/.complete-shell}"
   : "${COMPLETE_SHELL_BASE:=${COMPLETE_SHELL_PATH##*:}}"
   : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_BASE/comp}"
