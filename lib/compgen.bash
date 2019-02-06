@@ -100,7 +100,7 @@ __complete-shell:compgen() {
 
     local hint
     for hint in "${hints[@]}"; do
-      printf -v hint "%-${COLUMNS}s_" "$hint"
+      printf -v hint "%-$((COLUMNS-2))s_" "$hint"
       COMPREPLY+=("${hint%_}")
     done
 
