@@ -1,3 +1,19 @@
+## v0.2.9   2019/02/06
+- Fix bug where last completion not showing
+- Support +func+ to apply arg completion to remaining args
+- Deal with colons (:) in completions
+- Properly escape single quotes in descriptions
+- 'complete-shell add' was not picking up the .bash file
+- Support text hints in compdefs
+- Use N name rather than comp file for completion name
+- Add 'cmd' and 'str' function to stdlib
+- Add complete-cpanm and complete-tmux to search index
+- Redo alias command
+- Put '\* ' in front of hints
+- Use one space before descriptions (not two)
+- Refactor interactive tests
+- Refactor share/complete-shell.comp
+
 ## v0.2.8   2019/01/30
 - Put .defaults cache file under config dir
 
