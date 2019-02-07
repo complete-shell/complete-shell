@@ -1,3 +1,6 @@
+## v0.2.10   2019/02/06
+- Fix assorted Mac bugs
+
 ## v0.2.9   2019/02/06
 - Fix bug where last completion not showing
 - Support +func+ to apply arg completion to remaining args
