@@ -33,11 +33,11 @@ get-config() {
     config_vals+=("${!key}")
 
     [[ ${modern_settings-} == true &&
-       $key == @(single_tab|no_prompt|show*) &&
+       $key =~ ^(single_tab$|no_prompt$|show) &&
        -z ${!key-}
     ]] && printf -v "$key" true
 
-    [[ ${!key-} == @(true|false) ]] ||
+    [[ ${!key-} =~ ^(true|false)$ ]] ||
       printf -v "$key" false
   done
 }

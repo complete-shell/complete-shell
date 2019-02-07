@@ -100,7 +100,7 @@ complete-shell:config() {
     echo "${!key-}"
 
   elif [[ $# -eq 2 ]]; then
-    [[ $2 == @(true|false|) ]] ||
+    [[ -z $2 || $2 =~ ^(true|false)$ ]] ||
       die "Invalid value '$2'. Must be true, false, or ''."
     text=$(grep -Ev "^$1=" "$COMPLETE_SHELL_CONFIG")
     [[ $2 ]] && text+=$'\n'"$1=$2"

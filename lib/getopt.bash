@@ -108,7 +108,7 @@ getopt() {
     if [[ $# -gt 0 ]]; then
       if $array; then
         for ((i = 1; i <= $#; i++)); do
-          printf -v "$arg_var"[$i-1] '%s' "${!i}"
+          read -r "$arg_var"[i-1] <<< "${!i}"
         done
         set --
       else

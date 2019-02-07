@@ -18,7 +18,9 @@ Array.get() {
 }
 
 Array.set() {
-  printf -v "$1"[$2] '%s' "$3"
+  # Doesn't work in Bash 3:
+  # printf -v "$1"[$2] '%s' "$3"
+  IFS=$'\n' read -r "$1"[$2] <<< "$3"
 }
 
 Array.push() {
