@@ -60,7 +60,7 @@ complete-shell() {
     source "$COMPLETE_SHELL_ROOT/lib/config.bash" apply
   fi
 
-  if [[ $cmd =~ ^(init|add)$ ]]; then
+  if [[ $cmd =~ ^(init|add|install)$ ]]; then
     if [[ ${BASH_VERSINFO[0]} == '3' ]]; then
       set -- "$COMPLETE_SHELL_BASE"/bash-completion/completions/*.bash
       for comp; do
