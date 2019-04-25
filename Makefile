@@ -11,6 +11,7 @@ default:
 test:
 	shellcheck .rc
 	shellcheck .bashrc
+	shellcheck ./bin/complete-shell
 	@for file in $$(find . | grep -E '\.(bash|sh)$$' | grep -v '/\.git/'); do \
  	    echo "shellcheck $$file"; \
  	    shellcheck $$file; \

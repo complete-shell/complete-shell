@@ -78,7 +78,7 @@ complete-shell:config() {
       actual=${config_vals[i]}
 
       printf -v line "%s=%s" "$key" "$actual"
-      if [[ $value == $actual ]]; then
+      if [[ $value == "$actual" ]]; then
         echo "$line"
       else
         printf "%-20s (%s)\n" "$line" "$value"
@@ -439,12 +439,12 @@ complete-shell:init() {
     "${COMPLETE_SHELL_CONFIG%/*}" \
 
   [[ $COMPLETE_SHELL_SHELL == bash ]] &&
-    printf "$BASH_CONFIG_TEXT" > "$COMPLETE_SHELL_CONFIG"
+    printf %s "$BASH_CONFIG_TEXT" > "$COMPLETE_SHELL_CONFIG"
 
   (
     cd "$COMPLETE_SHELL_COMP" || exit 1
-    ln -fs "$COMPLETE_SHELL_ROOT/share/complete-shell.comp"
-    ln -fs "$COMPLETE_SHELL_ROOT/share/complete-shell.bash"
+    ln -fs "$COMPLETE_SHELL_ROOT/share/complete-shell.comp" complete-shell.comp
+    ln -fs "$COMPLETE_SHELL_ROOT/share/complete-shell.bash" complete-shell.bash
   )
 
   remake complete-shell
