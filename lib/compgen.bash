@@ -6,7 +6,7 @@
 
 
 
-# shellcheck shell=bash disable=1090,2034,2154
+# shellcheck shell=bash disable=1090,2034,2059,2154
 
 #------------------------------------------------------------------------------
 # This is the entry-point function for every complete-shell completion and the
@@ -15,13 +15,24 @@
 # from the stdout of the internal functions it calls.
 #------------------------------------------------------------------------------
 __complete-shell:compgen() {
+  compopt -o nosort 2>/dev/null
+
+  local hint padded="%-$((COLUMNS-2))s_"
+  if [[ ! -d ${COMPLETE_SHELL_ROOT-} ]]; then
+    printf -v hint "$padded" \
+      "CompleteShell can't complete '${COMP_WORDS[0]}'. COMPLETE_SHELL_ROOT is undefined."
+    COMPREPLY+=("$hint")
+    printf -v hint "$padded" \
+      "See: https://github.com/complete-shell/complete-shell/wiki/Bash-Setup"
+    COMPREPLY+=("$hint")
+    return
+  fi
+
   # shellcheck disable=2046
   local $(source "$COMPLETE_SHELL_ROOT/lib/config.bash" vars)
   source "$COMPLETE_SHELL_ROOT/lib/config.bash" get
 
   $disabled && { _minimal; return; }
-
-  compopt -o nosort 2>/dev/null
 
   local comp_word=${COMP_WORDS[COMP_CWORD]}
   [[ $comp_word == '=' ]] && comp_word=
@@ -35,14 +46,6 @@ __complete-shell:compgen() {
 
   local hints=()
   while true; do
-    if [[ ! -d ${COMPLETE_SHELL_ROOT-} ]]; then
-      hints=(
-        "CompleteShell can't complete '${COMP_WORDS[0]}'. COMPLETE_SHELL_ROOT is undefined."
-        "See: https://github.com/complete-shell/complete-shell/wiki/Bash-Setup"
-      )
-      break
-    fi
-
     local line comps=''
     while IFS=$'\n' read -r line; do
       if [[ $line =~ ^\$\  ]]; then
