@@ -56,7 +56,7 @@ main() {
 }
 
 setup() {
-  [[ $TMUX ]] ||
+  [[ ${TMUX-} ]] ||
     die "You need to run this inside tmux (with 2 or 3 panes)." \
       "Run this in pane 0, output in pane 1, debug in pane 2."
 
