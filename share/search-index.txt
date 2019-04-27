@@ -1,0 +1,44 @@
+# This is the search index for complete-shell. It is used by the complete-shell
+# 'search' and 'install' commands. You can add to this list by submitting a
+# pull request for your additions.
+#
+# Each entry must contain a 'name' field as its first line. Other lines may
+# follow with extra fields, if needed: The valid fields are as follows:
+#
+#   'name' - The name of the entry which is usually the name of the command for
+#   which completion is being provided.
+#
+#   'tags' - A space separated list of tags (words) for the entry. The tag can
+#   be used to install many compdefs at once. Like this:
+#
+#       complete-shell install @some-tag
+#
+#   'from' - The location where source code for the completion lives. This is
+#   usually a GitHub repository URL, but could be other things. The default
+#   value is based off of the name field:
+#
+#       https://github.com/complete-shell/complete-<name>
+#
+#   'type' - Specifies the type of the 'from' field. Currently the default (and
+#   only valid value) is 'git'.
+#
+#   'branch' - If 'from' is a Git repository, this is the branch where the
+#   compdef code lives. The default is 'master'.
+#
+#   'path' - Since compdefs may be a part of another project, they may live in
+#   a subdirectory. This is the relative path of where the compdef code lives.
+#   The default is '.'.
+#
+#   'cmds' - This is a space separated list of commands that this compdef
+#   should be applied to. The default is the value of 'name', but sometimes a
+#   command may go by different names, or 2 similar commands might use the same
+#   compdef.
+
+name: cpanm
+tags: perl
+
+name: prove
+tags: perl
+
+name: tmux
+cmds: tmate

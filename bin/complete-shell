@@ -115,28 +115,28 @@ complete-shell:config() {
 # shellcheck disable=2154
 complete-shell:search() {
   local term=${1-}
-  (
-    if [[ $term ]]; then
-      grep "$term" "$COMPLETE_SHELL_INDEX"
+  local green="\e[0;32m" normal="\e[m"
 
-    else
-      cat "$COMPLETE_SHELL_INDEX"
+  print-search-entry() {
+    printf "$green%s$normal\n" "$name"
+
+    if $option_verbose; then
+      [[ ${#cmds[*]} -gt 1 || ${cmds[0]} != "$name" ]] &&
+        echo "  Commands: ${cmds[*]}"
+      [[ $tags ]] && echo "  Tags: ${tags[*]}"
+      [[ $from ]] && echo "  From: $from"
+      [[ $type && $type != git ]] &&
+        echo "  Type: $type"
+      [[ $branch && $branch != master ]] &&
+        echo "  Branch: $branch"
+      [[ $path && $path != . ]] &&
+        echo "  Path: $path"
+      true
     fi
-  ) |
-  (
-    while read -r name from branch subdir cmds; do
-      [[ $name == '"name"' ]] && continue
+  }
 
-      printf "\e[0;32m%s\e[m\n" "$name"
-
-      if $option_verbose; then
-        cat <<...
-  From: $from
-  Cmds: $cmds
-...
-      fi
-    done
-  ) | less -FRX
+  (search-index "$term" print-search-entry | less -FRX) ||
+    die "No compdefs found for '$term'"
 }
 
 complete-shell:list() {
@@ -176,35 +176,32 @@ complete-shell:show() {
 complete-shell:install() {
   name="$1"
 
-  line="$(grep "^$name"$'\t' "$COMPLETE_SHELL_INDEX" |
-    grep -v ^name |
-    head -n1
-  )"
-  [[ $line ]] ||
-    die "Invalid complete-shell install name: '$name'"
+  install-entry() {
+    local repo_path="$COMPLETE_SHELL_SRC/$name"
 
-  read -r name from branch path cmds <<<"$line"
-  local repo_path="$COMPLETE_SHELL_SRC/$name"
+    if [[ -d $repo_path ]]; then
+      (
+        cd "$repo_path" || return
+        git pull --ff-only &> /dev/null
+        echo "Pulled $from"
+      )
 
-  if [[ -d $repo_path ]]; then
-    (
-      cd "$repo_path" || return
-      git pull --ff-only &> /dev/null
-      echo "Pulled $from"
-    )
+    else
+      git clone --quiet --branch="$branch" "$from" "$repo_path" \
+        &> /dev/null
+      say "Cloned $from"
+    fi
 
-  else
-    git clone --quiet --branch="$branch" "$from" "$repo_path" \
-      &> /dev/null
-    say "Cloned $from"
-  fi
+    for file_path in "$repo_path/$path"/*.comp; do
+      # shellcheck disable=2049
+      [[ $file_path =~ \* ]] && break
+      complete-shell:add "$file_path"
+      say "Added ${file_path##*/}"
+    done
+  }
 
-  for file_path in "$repo_path/$path"/*.comp; do
-    # shellcheck disable=2049
-    [[ $file_path =~ \* ]] && break
-    complete-shell:add "$file_path"
-    say "Added ${file_path##*/}"
-  done
+  search-index "$name" install-entry ||
+    die "Can't find anything to insall for '$name'"
 }
 
 complete-shell:add() {
@@ -461,6 +458,49 @@ BASH_CONFIG_TEXT="\
 "
 
 #------------------------------------------------------------------------------
+# shellcheck disable=2059,2086,2206,2207
+search-index() {
+  local term=$1 callback=$2
+
+  local found=false line name tags=() from type branch path cmds=()
+
+  match() {
+    if [[ -z $term ]] ||
+       [[ $term == @* &&
+          " ${tags[*]} " == *\ $term\ *
+       ]] ||
+       [[ $term == "$name" ]]
+    then
+      found=true
+      $callback
+    fi
+  }
+
+  while read -r line; do
+    if [[ $line =~ ^name:\ +([^[:space:]]+) ]]; then
+      next=${BASH_REMATCH[1]}
+      [[ $name ]] && match
+      name=$next tags=() type=git branch=master path=. cmds=("$next")
+      from="https://github.com/complete-shell/complete-$name"
+
+    elif [[ $line =~ ^([a-z]+):\ +(.*)$ ]]; then
+      field=${BASH_REMATCH[1]}
+      value=${BASH_REMATCH[2]}
+      if [[ $field == tags ]]; then
+        tags=( $(printf "@%s " $value) )
+      elif [[ $field == cmds ]]; then
+        cmds=( $value )
+      else
+        printf -v "$field" "$value"
+      fi
+    fi
+  done < "$COMPLETE_SHELL_INDEX"
+
+  [[ $name ]] && match
+
+  $found
+}
+
 remake() {
   comp=${1##*/}
   comp=${comp%.comp}
@@ -515,7 +555,7 @@ check-env() {
   : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_BASE/comp}"
   : "${COMPLETE_SHELL_BASH_DIR:=$COMPLETE_SHELL_BASE/bash-completion/completions}"
   : "${COMPLETE_SHELL_SHARE:=$COMPLETE_SHELL_ROOT/share}"
-  : "${COMPLETE_SHELL_INDEX:=$COMPLETE_SHELL_SHARE/search-index.tsv}"
+  : "${COMPLETE_SHELL_INDEX:=$COMPLETE_SHELL_SHARE/search-index.txt}"
 
   errors=false
 
