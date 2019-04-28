@@ -34,6 +34,9 @@
 #   command may go by different names, or 2 similar commands might use the same
 #   compdef.
 
+name: cpan
+tags: perl
+
 name: cpanm
 tags: perl
 
