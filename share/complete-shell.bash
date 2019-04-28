@@ -7,9 +7,9 @@ config-keys() {
 
 all-compgens() {
   while IFS='' read -r line; do
-    [[ $line =~ ^\" ]] && continue
-    echo "$line" | cut -f1
-  done < "$COMPLETE_SHELL_ROOT/share/search-index.tsv"
+    [[ $line =~ ^name:\ ([^[:space:]]+) ]] || continue
+    echo "${BASH_REMATCH[1]}"
+  done < "$COMPLETE_SHELL_ROOT/share/search-index.txt"
 }
 
 installed() (
