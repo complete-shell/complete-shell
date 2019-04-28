@@ -240,6 +240,8 @@ call-function() {
   : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_BASE/comp}"
   : "${COMPLETE_SHELL_CONFIG:=$COMPLETE_SHELL_BASE/config/bash}"
   : "${COMPLETE_SHELL_BASH_DIR:=$COMPLETE_SHELL_BASE/bash-completion/completions}"
+  : "${COMPLETE_SHELL_TEMP:=$COMPLETE_SHELL_BASE/tmp}"
+  : "${COMPLETE_SHELL_CACHE:=$COMPLETE_SHELL_BASE/cache}"
 
   local pattern=''
   if [[ $func =~ (.*)=(.*) ]]; then

@@ -176,8 +176,18 @@ complete-shell:show() {
 complete-shell:install() {
   name="$1"
 
+  : "${COMPLETE_SHELL_TEMP:=$COMPLETE_SHELL_BASE/tmp}"
+  : "${COMPLETE_SHELL_CACHE:=$COMPLETE_SHELL_BASE/cache}"
+
+  mkdir -p \
+    "$COMPLETE_SHELL_TEMP" \
+    "$COMPLETE_SHELL_CACHE"
+
   install-entry() {
     local repo_path="$COMPLETE_SHELL_SRC/$name"
+
+    [[ ${COMPLETE_SHELL_TEST_FROM_BASE_PATH-} ]] &&
+      from=$COMPLETE_SHELL_TEST_FROM_BASE_PATH/complete-$name
 
     if [[ -d $repo_path ]]; then
       (
@@ -193,6 +203,8 @@ complete-shell:install() {
     fi
 
     for file_path in "$repo_path/$path"/*.comp; do
+      [[ -f "$repo_path/$path/install" ]] &&
+        source "$repo_path/$path/install"
       # shellcheck disable=2049
       [[ $file_path =~ \* ]] && break
       complete-shell:add "$file_path"
