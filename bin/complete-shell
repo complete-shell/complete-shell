@@ -186,15 +186,32 @@ complete-shell:install() {
   install-entry() {
     local repo_path="$COMPLETE_SHELL_SRC/$name"
 
-    [[ ${COMPLETE_SHELL_TEST_FROM_BASE_PATH-} ]] &&
+    if [[ $name == complete-shell ]]; then
+      from=$COMPLETE_SHELL_ROOT
+      branch=master
+      path=share
+
+    elif [[ ${COMPLETE_SHELL_TEST_FROM_BASE_PATH-} ]]; then
       from=$COMPLETE_SHELL_TEST_FROM_BASE_PATH/complete-$name
+      (
+        cd "$from"
+        [[ ! $(git diff --stat) ]] ||
+          die "Local compgen repo '$from' is dirty." \
+              "Please commit."
+      ) || exit
+    fi
 
     if [[ -d $repo_path ]]; then
-      (
-        cd "$repo_path" || return
-        git pull --ff-only &> /dev/null
-        echo "Pulled $from"
-      )
+      if [[ $is_update ]]; then
+        (
+          cd "$repo_path" || return
+          git pull --ff-only &> /dev/null
+          say "Pulled $from"
+        )
+      else
+        die "'$name' is already installed." \
+            "Try 'complete-shell update $name'"
+      fi
 
     else
       git clone --quiet --branch="$branch" "$from" "$repo_path" \
@@ -203,20 +220,37 @@ complete-shell:install() {
     fi
 
     for file_path in "$repo_path/$path"/*.comp; do
-      [[ -f "$repo_path/$path/install" ]] &&
-        source "$repo_path/$path/install"
       # shellcheck disable=2049
       [[ $file_path =~ \* ]] && break
+      file_path=${file_path/\/\.\//\/}
+      ( cd $COMPLETE_SHELL_COMP && ln -fs $file_path ) || die
+      bash_file=${file_path%.comp}.bash
+      [[ -f $bash_file ]] &&
+        ( cd $COMPLETE_SHELL_COMP && ln -fs $bash_file ) || die
       complete-shell:add "$file_path"
-      say "Added ${file_path##*/}"
+      if [[ $is_update ]]; then
+        say "Updated $file_path"
+      else
+        say "Added $file_path"
+      fi
     done
+
+    [[ -f "$repo_path/$path/install" ]] &&
+      source "$repo_path/$path/install"
+
+    true
   }
 
-  search-index "$name" install-entry ||
-    die "Can't find anything to insall for '$name'"
+  if [[ $name == complete-shell ]]; then
+    install-entry complete-shell
+
+  else
+    search-index "$name" install-entry ||
+      die "Can't find anything to install for '$name'"
+  fi
 }
 
-complete-shell:add() {
+complete-shell:add() (
   [[ $# -gt 0 ]] ||
     die "usage: complete-shell add <path/to/command.comp>..."
 
@@ -229,15 +263,17 @@ complete-shell:add() {
 
     if $option_symlink; then
       die "--symlink not yet implemented"
-    else
+
+    elif [[ ! -h $COMPLETE_SHELL_COMP/${comp_file##*/} ]]; then
       cp "$comp_file" "$COMPLETE_SHELL_COMP/"
       bash_file=${comp_file%.comp}.bash
       [[ -f $bash_file ]] &&
         cp "$bash_file" "$COMPLETE_SHELL_COMP/"
-      remake "$comp_file"
     fi
+
+    remake "$comp_file"
   done
-}
+)
 
 complete-shell:delete() {
   [[ $# -gt 0 ]] ||
@@ -288,7 +324,7 @@ complete-shell:enable() {
   done
 }
 
-complete-shell:update() {
+complete-shell:update() (
   [[ $# -gt 0 ]] ||
     die "usage: complete-shell update <compgen-name>..."
 
@@ -300,23 +336,14 @@ complete-shell:update() {
       die "The compgen '$comp' is not installed"
 
     if [[ -h "$COMPLETE_SHELL_COMP/$comp.comp" ]]; then
-      target=$(realpath "$COMPLETE_SHELL_COMP/$comp.comp") ||
-        die "Error with 'realpath $COMPLETE_SHELL_COMP/$comp.comp'"
-
-      dir=$(cd "$(dirname "$target")" && pwd) ||
-        die "Can't get dir for '$comp'"
-
-      (
-        set -x
-        cd "$dir" || exit
-        git pull --quiet --ff-only
-      )
+      is_update=true
+      complete-shell:install "$comp"
 
     else
       echo "Can't update '$comp'. It has no upstream."
     fi
   done
-}
+)
 
 # Just cd to the complete-shell repo and pull:
 complete-shell:upgrade() {
@@ -334,8 +361,10 @@ complete-shell:alias() {
   cmd=$1
   alias=$2
 
-  [[ -f $COMPLETE_SHELL_BASH_DIR/$cmd.bash ]] ||
-    die "No completion enabled for '$cmd'"
+  if [[ $cmd != complete-shell ]]; then
+    [[ -f $COMPLETE_SHELL_BASH_DIR/$cmd.bash ]] ||
+      die "No completion enabled for '$cmd'"
+  fi
 
   [[ $alias =~ ^[-a-zA-Z0-9_]+$ ]] ||
     die "Invalid alias name '$alias'"
@@ -450,12 +479,7 @@ complete-shell:init() {
   [[ $COMPLETE_SHELL_SHELL == bash ]] &&
     printf %s "$BASH_CONFIG_TEXT" > "$COMPLETE_SHELL_CONFIG"
 
-  (
-    cd "$COMPLETE_SHELL_COMP" || exit 1
-    ln -fs "$COMPLETE_SHELL_ROOT/share/complete-shell.comp" complete-shell.comp
-    ln -fs "$COMPLETE_SHELL_ROOT/share/complete-shell.bash" complete-shell.bash
-  )
-
+  complete-shell:install complete-shell
   remake complete-shell
 
   say "Initialized '$COMPLETE_SHELL_BASE'"
@@ -464,7 +488,7 @@ complete-shell:init() {
 BASH_CONFIG_TEXT="\
 #     CompleteShell Configuration Settings
 #
-# Use 'complete-shell-config' to show and set these.
+# Use 'complete-shell config' to show and set these.
 # See 'complete-shell help' for more details.
 
 "
@@ -481,7 +505,7 @@ search-index() {
        [[ $term == @* &&
           " ${tags[*]} " == *\ $term\ *
        ]] ||
-       [[ $term == "$name" ]]
+       [[ $name =~ $term ]]
     then
       found=true
       $callback
@@ -549,7 +573,7 @@ can() {
   command -v "$1" >/dev/null
 }
 
-die() { for line; do echo "$line" >&2; done; exit 1; }
+die() { printf "%s\n" "$@" >&2; exit 1; }
 
 #------------------------------------------------------------------------------
 check-env() {
