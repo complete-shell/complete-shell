@@ -218,9 +218,13 @@ complete-arguments() {
   index=${#comp_args[*]}
   func=${!index}
 
-  [[ -z "$func" ]] &&
-    [[ ${!#} == *+ ]] &&
-    func=${!#}
+  if [[ -z "$func" ]]; then
+    if [[ ${!#} == *... ]]; then
+      func=${!#}
+    fi
+  fi
+
+  func=${func%...}
 
   call-function "${func%+}"
 }
