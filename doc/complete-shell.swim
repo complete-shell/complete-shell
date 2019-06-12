@@ -138,8 +138,8 @@ You should also really try turning on the cool modern settings:
 
 - `complete-shell add <compdef-filepath>`
 
-  Adds a local compdef file path to your config. It will be enabled by
-  default.
+  Adds a local compdef file path to your installed completions. It will be
+  enabled by default.
 
 - `complete-shell delete <compdef-name>`
 
@@ -147,7 +147,7 @@ You should also really try turning on the cool modern settings:
 
 - `complete-shell disable <compdef-name>`
 
-  Disable a compdef (but don't delete it). Use this to turn of a specific
+  Disable a compdef (but don't delete it). Use this to turn off a specific
   command completion temporarily. Use the `enable` command to turn it back on.
 
 - `complete-shell enable <compdef-name>`
@@ -195,7 +195,8 @@ These options all default to `false`. To turn on an option:
 
 - `single_tab`
 
-  Only require a single TAB press to trigger completion.
+  Only require a single TAB press to trigger completion. By default, Bash
+  requires you to press TAB twice.
 
 - `no_prompt`
 
@@ -290,12 +291,12 @@ Here is a simple example. Define a file called `foo.comp`:
   CompleteShell v0.2
 
   # Command name:
-  N foo     ..The mighty foo CLI
+  N foo  0.0.1  ..The mighty foo CLI
 
   # Command options:
-  O --aaa   ..The aaa option
+  O --aaa       ..The aaa option
   O --bbb =file \
-            ..The bbb option
+        ..The bbb option
 
   # Sub-commands:
   C bar +str            ..Do the bar
@@ -322,7 +323,7 @@ in `/path/to/complete-shell/share/complete-shell.comp`.
   * Fish uses `<name>.fish`
   * A `<name>.sh` is POSIX shell code that works in Bash or Zsh
 * A compdef file can define completions for one or more commands
-* A compdef Git repo contains one or more comdef files
+* A compdef Git repo contains one or more compdef files
   * A set of compdef files is called a package
 * A compdef file uses the syntax described in the next section
 
@@ -348,6 +349,9 @@ to use.
 A compdef files consists of comments, blank lines and single-line command
 statements.
 
+Note: the single-line commands can actually span multiple lines by using `\`
+continuation.
+
 This is a list of the compdef statement commands:
 
 - `CompleteShell v0.2`
@@ -356,11 +360,12 @@ This is a list of the compdef statement commands:
   have a version argument as shown above. The version is used to invoke the
   appropriate compiler and runtime for that file.
 
-- `N <name>`
+- `N <name> [<version-number>] [..<description>]`
 
   The name of the statement for which completion is being defined. This is the
-  second statement in the file. All other statement apply to this `name` until
-  the end of file or another `N` command starts a new definition.
+  second statement in the file. All other statements apply to this `name` until
+  the end of file or another `N` command starts a new definition. Version
+  numbers must be of the form `#.#.#`.
 
 - `O <--option>`
 
@@ -390,7 +395,8 @@ Sharing compdef files is simple. Create a Git repo for your compdef files:
 
   ReadMe          # Describe your repo
   foo.comp        # compdef for the foo command
-  bars.comp       # compdef for the bar commands
+  foo.sh          # Helper shell functions for `foo` completion
+  bars.comp       # compdef for the (several) bar commands
 
 Then push it to a public Git host, like GitHub or BitBucket.
 
@@ -398,7 +404,7 @@ If you want it to be found in the `complete-shell search` command, then
 register it with complete-shell:
 
 * Fork/clone https://github.com/complete-shell/complete-shell
-* Add your repo to the `share/search-index.tsv` file
+* Add your repo to the `share/search-index.txt` file
 * Commit and push
 * Create a GitHub Pull Request
 
