@@ -148,11 +148,25 @@ complete-shell:list() {
       comp=${comp#./}
       comp=${comp%.comp}
 
-      enabled=' '
-      [[ -f $COMPLETE_SHELL_BASH_DIR/$comp.bash ]] ||
+      enabled='+'
+      comp_file=$COMPLETE_SHELL_BASH_DIR/$comp.bash
+      if [[ -f $comp_file ]]; then
+        vers=$(
+          grep -E '^\ +local\ cmd_vers=' "$comp_file" |
+            head -n1 | cut -d'=' -f2
+        )
+        desc=$(
+          grep -E '^\ +local\ cmd_desc=' "$comp_file" |
+            head -n1 | cut -d'=' -f2
+        ) || true
+        desc=${desc#\'}
+        desc=${desc%\'}
+      else
         enabled=x
+      fi
+      vers=${vers:-0.0.0}
 
-      printf "%s %s\n" "$enabled" "$comp"
+      printf "%-2s%-20s  %s  %-9s\n" "$enabled" "$comp" "v$vers" "$desc"
     done
   ) | less -FRX
 }

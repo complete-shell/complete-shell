@@ -10,12 +10,13 @@ compiler:init() {
     "${BASH_REMATCH[2]}"
 
   cmd_name=01
-  cmd_desc=02
-  opt_desc=03
-  opt_name=04
-  opt_type=05
-  arg_desc=06
-  arg_type=07
+  cmd_vers=02
+  cmd_desc=03
+  opt_desc=04
+  opt_name=05
+  opt_type=06
+  arg_desc=07
+  arg_type=08
   sub_cmds=09
 }
 
@@ -32,6 +33,14 @@ N() {
 
   unset "long_$num" "short_$num"
 
+  vers=0.0.0
+  if [[ $1 =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    [[ $1 =~ [1-9] ]] ||
+      die "Version 'v0.0.0' is illegal version number"
+    vers=${1#v}
+    shift
+  fi
+
   desc=
   for arg; do
     case $arg in
@@ -41,6 +50,7 @@ N() {
   done
 
   set-value cmd_name "$name"
+  set-value cmd_vers "$vers"
   set-value cmd_desc "$desc"
 }
 
