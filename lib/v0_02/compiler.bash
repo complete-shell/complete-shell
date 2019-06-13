@@ -12,12 +12,13 @@ compiler:init() {
   cmd_name=01
   cmd_vers=02
   cmd_desc=03
-  opt_desc=04
-  opt_name=05
-  opt_type=06
-  arg_desc=07
-  arg_type=08
-  sub_cmds=09
+  cmd_usag=04
+  opt_desc=05
+  opt_name=06
+  opt_type=07
+  arg_desc=08
+  arg_type=09
+  sub_cmds=10
 }
 
 N() {
@@ -52,6 +53,10 @@ N() {
   set-value cmd_name "$name"
   set-value cmd_vers "$vers"
   set-value cmd_desc "$desc"
+}
+
+U() {
+  set-value cmd_usag "$*"
 }
 
 O() {

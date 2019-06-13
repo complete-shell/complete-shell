@@ -118,7 +118,12 @@ complete-shell:search() {
   local green="\e[0;32m" normal="\e[m"
 
   print-search-entry() {
-    printf "$green%s$normal\n" "$name"
+    installed=
+    comp_file=$COMPLETE_SHELL_BASH_DIR/$name.bash
+    if [[ -f $comp_file ]]; then
+      installed='+'
+    fi
+    printf "%-2s$green%-20s$normal %s\n" "$installed" "$name" "$desc"
 
     if $option_verbose; then
       [[ ${#cmds[*]} -gt 1 || ${cmds[0]} != "$name" ]] &&
@@ -239,8 +244,9 @@ complete-shell:install() {
       file_path=${file_path/\/\.\//\/}
       ( cd $COMPLETE_SHELL_COMP && ln -fs $file_path ) || die
       bash_file=${file_path%.comp}.bash
-      [[ -f $bash_file ]] &&
+      if [[ -f $bash_file ]]; then
         ( cd $COMPLETE_SHELL_COMP && ln -fs $bash_file ) || die
+      fi
       complete-shell:add "$file_path"
       if [[ $is_update ]]; then
         say "Updated $file_path"
@@ -294,15 +300,19 @@ complete-shell:delete() {
     die "usage: complete-shell delete <compgen-name>..."
 
   for comp; do
-    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
-      die "The compgen '$comp' is not installed"
-
     [[ $comp != complete-shell ]] ||
       die "delete 'complete-shell' is not allowed"
 
+    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
+      die "The compgen '$comp' is not installed"
+
     rm -f "$COMPLETE_SHELL_COMP/$comp.comp"
+    rm -fr "$COMPLETE_SHELL_SRC/$comp"
+    rm -fr "$COMPLETE_SHELL_BASH_DIR/$comp.bash"
 
     disable "$comp"
+
+    say "The '$comp' completion was successfully removed."
   done
 }
 
@@ -512,7 +522,7 @@ BASH_CONFIG_TEXT="\
 search-index() {
   local term=$1 callback=$2
 
-  local found=false line name tags=() from type branch path cmds=()
+  local found=false line name desc tags=() from type branch path cmds=()
 
   match() {
     if [[ -z $term ]] ||
@@ -530,7 +540,7 @@ search-index() {
     if [[ $line =~ ^name:\ +([^[:space:]]+) ]]; then
       next=${BASH_REMATCH[1]}
       [[ $name ]] && match
-      name=$next tags=() type=git branch=master path=. cmds=("$next")
+      name=$next desc= tags=() type=git branch=master path=. cmds=("$next")
       from="https://github.com/complete-shell/complete-$name"
 
     elif [[ $line =~ ^([a-z]+):\ +(.*)$ ]]; then

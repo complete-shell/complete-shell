@@ -35,15 +35,25 @@
 #   compdef.
 
 name: complete-shell
+desc: Modern tab completion everywhere
+tags: shell
 
 name: cpan
+desc: Easily interact with CPAN from the command line
 tags: perl
 
 name: cpanm
+desc: Get, unpack build and install modules from CPAN
+tags: perl
+
+name: cpan-upload
+desc: Upload a distribution to the CPAN
 tags: perl
 
 name: prove
+desc: Run tests through a TAP harness
 tags: perl
 
 name: tmux
+desc: Terminal multiplexer
 cmds: tmate
