@@ -15,9 +15,6 @@
 # functions.
 #------------------------------------------------------------------------------
 compgen-v0_02() {
-  # XXX Temporarily only support completion when cursor is at eol
-  [[ $COMP_POINT -eq ${#COMP_LINE} ]] || return 0
-
   # XXX Only support sane terminal width for now
   [[ $COLUMNS =~ ^[0-9]+$ && $COLUMNS -ge 40 ]] || return 0
 
@@ -286,3 +283,5 @@ call-function() {
     return 0
   fi
 }
+
+# vim: set lisp:

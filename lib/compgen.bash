@@ -34,6 +34,17 @@ __complete-shell:compgen() {
 
   $disabled && { _minimal; return; }
 
+  # Hack to pretend command ends at cursor:
+  {
+    COMP_LINE=${COMP_LINE:0:$COMP_POINT}
+    local ifs=$IFS
+    IFS=$COMP_WORDBREAKS
+    COMP_WORDS=($COMP_LINE)
+    IFS=$ifs
+    [[ $COMP_LINE =~ \ $ ]] && COMP_WORDS+=('')
+    COMP_CWORD=$(( ${#COMP_WORDS[*]} - 1 ))
+  }
+
   local comp_word=${COMP_WORDS[COMP_CWORD]}
   [[ $comp_word == '=' ]] && comp_word=
 
