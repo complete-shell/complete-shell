@@ -23,6 +23,12 @@ if [[ ${1-} == vars ]]; then
 fi
 
 get-config() {
+  local COMPLETE_SHELL_PATH=$COMPLETE_SHELL_PATH
+  local COMPLETE_SHELL_BASE=$COMPLETE_SHELL_BASE
+  : "${COMPLETE_SHELL_PATH:=${HOME:?}/.complete-shell}"
+  : "${COMPLETE_SHELL_BASE:=${COMPLETE_SHELL_PATH##*:}}"
+  [[ $COMPLETE_SHELL_BASE == "$COMPLETE_SHELL_ROOT" ]] && COMPLETE_SHELL_BASE+=/base
+
   config_file=${COMPLETE_SHELL_CONFIG:-${COMPLETE_SHELL_BASE:-$HOME/.complete-shell}/config/bash}
 
   [[ -f $config_file ]] &&

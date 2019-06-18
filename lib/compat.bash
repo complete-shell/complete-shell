@@ -38,6 +38,7 @@ if command -v _init_completion &>/dev/null; then
   # Put COMPLETE_SHELL_BASE in XDG_DATA_DIRS for bash_completion auto load:
   __complete_shell_path=${COMPLETE_SHELL_PATH:-$HOME/.complete-shell}
   __complete_shell_base=${COMPLETE_SHELL_BASE:-${__complete_shell_path##*:}}
+  [[ $__complete_shell_base == "$COMPLETE_SHELL_ROOT" ]] && __complete_shell_base+=/base
   __complete_shell_xdg=${XDG_DATA_DIRS:=/usr/local/share:/usr/share}
 
   xdg_data_dirs=$XDG_DATA_DIRS

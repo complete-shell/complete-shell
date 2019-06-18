@@ -400,6 +400,7 @@ complete-shell:alias() {
 
 _$alias() {
   local base=\${COMPLETE_SHELL_BASE:-\$HOME/.complete-shell}
+  [[ \$base == "\$COMPLETE_SHELL_ROOT" ]] && base+=/base
 
   source "\$base/bash-completion/completions/$cmd.bash"
 
@@ -616,6 +617,7 @@ check-env() {
   fi
   : "${COMPLETE_SHELL_PATH:=$HOME/.complete-shell}"
   : "${COMPLETE_SHELL_BASE:=${COMPLETE_SHELL_PATH##*:}}"
+  [[ $COMPLETE_SHELL_BASE == "$COMPLETE_SHELL_ROOT" ]] && COMPLETE_SHELL_BASE+=/base
   : "${COMPLETE_SHELL_CONFIG:=$COMPLETE_SHELL_BASE/config/$COMPLETE_SHELL_SHELL}"
   : "${COMPLETE_SHELL_SRC:=$COMPLETE_SHELL_BASE/src}"
   : "${COMPLETE_SHELL_COMP:=$COMPLETE_SHELL_BASE/comp}"

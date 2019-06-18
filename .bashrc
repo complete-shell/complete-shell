@@ -50,6 +50,7 @@ COMPLETE_SHELL_SHELL=bash \
 save-readline-settings() {
   local COMPLETE_SHELL_PATH=${COMPLETE_SHELL_PATH:-$HOME/.complete-shell}
   local COMPLETE_SHELL_BASE=${COMPLETE_SHELL_BASE:-${COMPLETE_SHELL_PATH##*:}}
+  [[ $COMPLETE_SHELL_BASE == "$COMPLETE_SHELL_ROOT" ]] && COMPLETE_SHELL_BASE+=/base
   local COMPLETE_SHELL_CONFIG=${COMPLETE_SHELL_CONFIG:-$COMPLETE_SHELL_BASE/config/bash}
 
   # Save the current readline values before changing them:
