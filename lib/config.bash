@@ -8,6 +8,7 @@ config_keys=(
   show_descriptions
   show_usage
   show_hints
+  use_fzf
   no_horizontal
 )
 
@@ -33,7 +34,7 @@ get-config() {
     config_vals+=("${!key}")
 
     [[ ${modern_settings-} == true &&
-       $key =~ ^(single_tab$|no_prompt$|show) &&
+       $key =~ ^(single_tab$|no_prompt$|show_|use_fzf$) &&
        -z ${!key-}
     ]] && printf -v "$key" true
 
@@ -56,6 +57,14 @@ apply-config() {
     bind 'set show-all-if-ambiguous on' 2>/dev/null
     bind 'set show-all-if-unmodified on' 2>/dev/null
   }
+
+  if $use_fzf; then
+    if ! command -v fzf >/dev/null; then
+      # TODO Maybe show hint here
+      use_fzf=false
+    fi
+  fi
+
 
   unset config_keys
 }

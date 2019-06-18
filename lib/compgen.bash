@@ -39,6 +39,7 @@ __complete-shell:compgen() {
     COMP_LINE=${COMP_LINE:0:$COMP_POINT}
     local ifs=$IFS
     IFS=$COMP_WORDBREAKS
+    # shellcheck disable=2206
     COMP_WORDS=($COMP_LINE)
     IFS=$ifs
     [[ $COMP_LINE =~ \ $ ]] && COMP_WORDS+=('')
@@ -47,6 +48,12 @@ __complete-shell:compgen() {
 
   local comp_word=${COMP_WORDS[COMP_CWORD]}
   [[ $comp_word == '=' ]] && comp_word=
+
+  if $use_fzf; then
+    source "$COMPLETE_SHELL_ROOT/lib/pager/fzf.bash"
+  else
+    source "$COMPLETE_SHELL_ROOT/lib/pager/default.bash"
+  fi
 
   local compgen_file
   printf -v compgen_file "%s/lib/%s/compgen.bash" \
