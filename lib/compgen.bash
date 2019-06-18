@@ -49,12 +49,6 @@ __complete-shell:compgen() {
   local comp_word=${COMP_WORDS[COMP_CWORD]}
   [[ $comp_word == '=' ]] && comp_word=
 
-  if $use_fzf; then
-    source "$COMPLETE_SHELL_ROOT/lib/pager/fzf.bash"
-  else
-    source "$COMPLETE_SHELL_ROOT/lib/pager/default.bash"
-  fi
-
   local compgen_file
   printf -v compgen_file "%s/lib/%s/compgen.bash" \
     "$COMPLETE_SHELL_ROOT" \

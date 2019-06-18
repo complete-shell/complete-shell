@@ -284,4 +284,21 @@ call-function() {
   fi
 }
 
+complete-shell-pager() {
+  if $use_fzf; then
+    if ! command -v fzf >/dev/null; then
+      hint "Config option 'use_fzf' is true but 'fzf' not installed"
+      hint "See: https://github.com/complete-shell/complete-shell/wiki/fzf-Setup"
+      return
+    fi
+
+    source "$COMPLETE_SHELL_ROOT/lib/pager/fzf.bash"
+    complete-shell-pager-fzf
+
+  else
+    source "$COMPLETE_SHELL_ROOT/lib/pager/default.bash"
+    complete-shell-pager-default
+  fi
+}
+
 # vim: set lisp:
