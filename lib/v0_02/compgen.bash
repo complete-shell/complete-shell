@@ -81,7 +81,7 @@ parse-command-line() {
       comp_copt=("${opts[@]}")
       opts=()
 
-      for ((i = 1; i < ${#sub_cmds[*]}; i++)); do
+      for ((i = 1; i <= ${#sub_cmds[*]}; i++)); do
         if [[ $word == "${sub_cmds[i]}" ]]; then
           (( comp_snum = i ))
           break
