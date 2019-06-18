@@ -242,10 +242,10 @@ complete-shell:install() {
       # shellcheck disable=2049
       [[ $file_path =~ \* ]] && break
       file_path=${file_path/\/\.\//\/}
-      ( cd $COMPLETE_SHELL_COMP && ln -fs $file_path ) || die
+      ( cd "$COMPLETE_SHELL_COMP" && ln -fs "$file_path" . ) || die
       bash_file=${file_path%.comp}.bash
       if [[ -f $bash_file ]]; then
-        ( cd $COMPLETE_SHELL_COMP && ln -fs $bash_file ) || die
+        ( cd "$COMPLETE_SHELL_COMP" && ln -fs "$bash_file" . ) || die
       fi
       complete-shell:add "$file_path"
       if [[ $is_update ]]; then
@@ -306,9 +306,9 @@ complete-shell:delete() {
     [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
       error "The compgen '$comp' is not installed."
 
-    rm -f "$COMPLETE_SHELL_COMP/$comp.comp"
-    rm -fr "$COMPLETE_SHELL_SRC/$comp"
-    rm -fr "$COMPLETE_SHELL_BASH_DIR/$comp.bash"
+    rm -f "${COMPLETE_SHELL_COMP:?}/$comp.comp"
+    rm -fr "${COMPLETE_SHELL_SRC:?}/$comp"
+    rm -fr "${COMPLETE_SHELL_BASH_DIR:?}/$comp.bash"
 
     disable "$comp"
 
@@ -540,7 +540,7 @@ search-index() {
     if [[ $line =~ ^name:\ +([^[:space:]]+) ]]; then
       next=${BASH_REMATCH[1]}
       [[ $name ]] && match
-      name=$next desc= tags=() type=git branch=master path=. cmds=("$next")
+      name=$next desc='' tags=() type=git branch=master path=. cmds=("$next")
       from="https://github.com/complete-shell/complete-$name"
 
     elif [[ $line =~ ^([a-z]+):\ +(.*)$ ]]; then
