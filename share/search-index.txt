@@ -45,7 +45,7 @@ desc: Easily interact with CPAN from the command line
 tags: perl
 
 name: cpanm
-desc: Get, unpack build and install modules from CPAN
+desc: Get, unpack, build and install modules from CPAN
 tags: perl
 
 name: cpm
@@ -54,6 +54,14 @@ tags: perl
 
 name: cpan-upload
 desc: Upload a distribution to the CPAN
+tags: perl
+
+name: dzil
+desc: Do stuff with your dist
+tags: perl
+
+name: perl
+desc: The Perl 5 language interpreter
 tags: perl
 
 name: prove
