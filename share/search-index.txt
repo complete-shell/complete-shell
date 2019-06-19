@@ -68,6 +68,10 @@ name: prove
 desc: Run tests through a TAP harness
 tags: perl
 
+name: prove6
+desc: prove for Perl6
+tags: perl
+
 name: tmux
 desc: Terminal multiplexer
 cmds: tmate
