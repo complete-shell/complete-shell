@@ -8,6 +8,8 @@
 #   'name' - The name of the entry which is usually the name of the command for
 #   which completion is being provided.
 #
+#   'desc' - The description of the entry/command.
+#
 #   'tags' - A space separated list of tags (words) for the entry. The tag can
 #   be used to install many compdefs at once. Like this:
 #
@@ -44,6 +46,10 @@ tags: perl
 
 name: cpanm
 desc: Get, unpack build and install modules from CPAN
+tags: perl
+
+name: cpm
+desc: A fast CPAN module installer
 tags: perl
 
 name: cpan-upload
