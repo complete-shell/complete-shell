@@ -193,73 +193,10 @@ complete-shell:show() {
 }
 
 complete-shell:install() {
+  [[ $# -gt 0 ]] ||
+    die "usage: complete-shell update <compdef-name>..."
+
   name="$1"
-
-  : "${COMPLETE_SHELL_TEMP:=$COMPLETE_SHELL_BASE/tmp}"
-  : "${COMPLETE_SHELL_CACHE:=$COMPLETE_SHELL_BASE/cache}"
-
-  mkdir -p \
-    "$COMPLETE_SHELL_TEMP" \
-    "$COMPLETE_SHELL_CACHE"
-
-  install-entry() {
-    local repo_path="$COMPLETE_SHELL_SRC/$name"
-
-    if [[ $name == complete-shell ]]; then
-      from=$COMPLETE_SHELL_ROOT
-      branch=master
-      path=share
-
-    elif [[ ${COMPLETE_SHELL_TEST_FROM_BASE_PATH-} ]]; then
-      from=$COMPLETE_SHELL_TEST_FROM_BASE_PATH/complete-$name
-      (
-        cd "$from"
-        [[ ! $(git diff --stat) ]] ||
-          die "Local compgen repo '$from' is dirty." \
-              "Please commit."
-      ) || exit
-    fi
-
-    if [[ -d $repo_path ]]; then
-      if [[ $is_update ]]; then
-        (
-          cd "$repo_path" || return
-          git pull --ff-only &> /dev/null
-          say "Pulled $from"
-        )
-      else
-        error "'$name' is already installed." \
-            "Try 'complete-shell update $name'"
-      fi
-
-    else
-      git clone --quiet --branch="$branch" "$from" "$repo_path" \
-        &> /dev/null
-      say "Cloned $from"
-    fi
-
-    for file_path in "$repo_path/$path"/*.comp; do
-      # shellcheck disable=2049
-      [[ $file_path =~ \* ]] && break
-      file_path=${file_path/\/\.\//\/}
-      ( cd "$COMPLETE_SHELL_COMP" && ln -fs "$file_path" . ) || die
-      bash_file=${file_path%.comp}.bash
-      if [[ -f $bash_file ]]; then
-        ( cd "$COMPLETE_SHELL_COMP" && ln -fs "$bash_file" . ) || die
-      fi
-      complete-shell:add "$file_path"
-      if [[ $is_update ]]; then
-        say "Updated $file_path"
-      else
-        say "Added $file_path"
-      fi
-    done
-
-    [[ -f "$repo_path/$path/install" ]] &&
-      source "$repo_path/$path/install"
-
-    true
-  }
 
   if [[ $name == complete-shell ]]; then
     install-entry complete-shell
@@ -269,6 +206,27 @@ complete-shell:install() {
       die "Can't find anything to install for '$name'"
   fi
 }
+
+complete-shell:update() (
+  [[ $# -gt 0 ]] ||
+    die "usage: complete-shell update <compdef-name>..."
+
+  for comp; do
+    [[ $comp =~ ^[-a-zA-Z0-9_]+$ ]] ||
+      error "Invalid compdef name '$comp'."
+
+    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
+      error "The compdef '$comp' is not installed."
+
+    if [[ -h "$COMPLETE_SHELL_COMP/$comp.comp" ]]; then
+      is_update=true
+      complete-shell:install "$comp"
+
+    else
+      echo "Can't update '$comp'. It has no upstream."
+    fi
+  done
+)
 
 complete-shell:add() (
   [[ $# -gt 0 ]] ||
@@ -297,14 +255,14 @@ complete-shell:add() (
 
 complete-shell:delete() {
   [[ $# -gt 0 ]] ||
-    die "usage: complete-shell delete <compgen-name>..."
+    die "usage: complete-shell delete <compdef-name>..."
 
   for comp; do
     [[ $comp != complete-shell ]] ||
       error "delete 'complete-shell' is not allowed."
 
     [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
-      error "The compgen '$comp' is not installed."
+      error "The compdef '$comp' is not installed."
 
     rm -f "${COMPLETE_SHELL_COMP:?}/$comp.comp"
     rm -fr "${COMPLETE_SHELL_SRC:?}/$comp"
@@ -318,11 +276,11 @@ complete-shell:delete() {
 
 complete-shell:disable() {
   [[ $# -gt 0 ]] ||
-    die "usage: complete-shell disable <compgen-name>..."
+    die "usage: complete-shell disable <compdef-name>..."
 
   for comp; do
     [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
-      error "The compgen '$comp' is not installed."
+      error "The compdef '$comp' is not installed."
 
     [[ $comp != complete-shell ]] ||
       error "disable 'complete-shell' is not allowed."
@@ -335,11 +293,11 @@ complete-shell:disable() {
 
 complete-shell:enable() {
   [[ $# -gt 0 ]] ||
-    die "usage: complete-shell enable <compgen-name>..."
+    die "usage: complete-shell enable <compdef-name>..."
 
   for comp; do
     [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
-      error "The compgen '$comp' is not installed."
+      error "The compdef '$comp' is not installed."
 
     [[ $comp != complete-shell ]] ||
       error "enable 'complete-shell' is not allowed."
@@ -347,27 +305,6 @@ complete-shell:enable() {
     remake "$comp"
   done
 }
-
-complete-shell:update() (
-  [[ $# -gt 0 ]] ||
-    die "usage: complete-shell update <compgen-name>..."
-
-  for comp; do
-    [[ $comp =~ ^[-a-zA-Z0-9_]+$ ]] ||
-      error "Invalid compgen name '$comp'."
-
-    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
-      error "The compgen '$comp' is not installed."
-
-    if [[ -h "$COMPLETE_SHELL_COMP/$comp.comp" ]]; then
-      is_update=true
-      complete-shell:install "$comp"
-
-    else
-      echo "Can't update '$comp'. It has no upstream."
-    fi
-  done
-)
 
 # Just cd to the complete-shell repo and pull:
 complete-shell:upgrade() {
@@ -453,7 +390,7 @@ complete-shell:compile() {
         comp_file="$COMPLETE_SHELL_COMP/$comp_file.comp"
 
       else
-        error "'$comp_file' is not a currently installed compgen."
+        error "'$comp_file' is not a currently installed compdef."
       fi
     fi
 
@@ -560,6 +497,72 @@ search-index() {
   [[ $name ]] && match
 
   $found
+}
+
+install-entry() {
+  local repo_path="$COMPLETE_SHELL_SRC/$name"
+
+  : "${COMPLETE_SHELL_TEMP:=$COMPLETE_SHELL_BASE/tmp}"
+  : "${COMPLETE_SHELL_CACHE:=$COMPLETE_SHELL_BASE/cache}"
+
+  mkdir -p \
+    "$COMPLETE_SHELL_TEMP" \
+    "$COMPLETE_SHELL_CACHE"
+
+  if [[ $name == complete-shell ]]; then
+    from=$COMPLETE_SHELL_ROOT
+    branch=master
+    path=share
+
+  elif [[ ${COMPLETE_SHELL_TEST_FROM_BASE_PATH-} ]]; then
+    from=$COMPLETE_SHELL_TEST_FROM_BASE_PATH/complete-$name
+    (
+      cd "$from"
+      [[ ! $(git diff --stat) ]] ||
+        die "Local compdef repo '$from' is dirty." \
+            "Please commit."
+    ) || exit
+  fi
+
+  if [[ -d $repo_path ]]; then
+    if [[ $is_update ]]; then
+      (
+        cd "$repo_path" || return
+        git pull --ff-only &> /dev/null
+        say "Pulled $from"
+      )
+    else
+      error "'$name' is already installed." \
+          "Try 'complete-shell update $name'"
+    fi
+
+  else
+    git clone --quiet --branch="$branch" "$from" "$repo_path" \
+      &> /dev/null
+    say "Cloned $from"
+  fi
+
+  for file_path in "$repo_path/$path"/*.comp; do
+    # shellcheck disable=2049
+    [[ $file_path =~ \* ]] && break
+    file_path=${file_path/\/\.\//\/}
+    ( cd "$COMPLETE_SHELL_COMP" && ln -fs "$file_path" . ) || die
+    bash_file=${file_path%.comp}.bash
+    if [[ -f $bash_file ]]; then
+      ( cd "$COMPLETE_SHELL_COMP" && ln -fs "$bash_file" . ) || die
+    fi
+    complete-shell:add "$file_path"
+    if [[ ${is_update-} ]]; then
+      say "Updated $file_path"
+    else
+      say "Added $file_path"
+    fi
+  done
+
+  [[ -f "$repo_path/$path/install" ]] &&
+    source "$repo_path/$path/install"
+
+  true
 }
 
 remake() {
