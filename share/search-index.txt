@@ -63,3 +63,7 @@ tags: perl
 name: tmux
 desc: Terminal multiplexer
 cmds: tmate
+
+name: zef
+desc: Perl6 Module Management
+tags: perl
