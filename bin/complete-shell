@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=1090,2034,2154
+# shellcheck disable=1090,2030,2031,2034,2154
 
 set -eu -o pipefail
 
@@ -193,39 +193,29 @@ complete-shell:show() {
 }
 
 complete-shell:install() {
+  local action=${action:-install}
+
   [[ $# -gt 0 ]] ||
-    die "usage: complete-shell update <compdef-name>..."
+    die "usage: complete-shell $action <compdef-name>..."
 
-  name="$1"
+  for name; do
+    [[ $name =~ ^@?[-a-zA-Z0-9_]+$ ]] ||
+      error "Invalid compdef name '$name'."
 
-  if [[ $name == complete-shell ]]; then
-    install-entry complete-shell
+    if [[ $name == complete-shell ]]; then
+      install-entry complete-shell
 
-  else
-    search-index "$name" install-entry ||
-      die "Can't find anything to install for '$name'"
-  fi
+    else
+      search-index "$name" install-entry ||
+        die "Can't find anything to $action for '$name'"
+    fi
+  done
 }
 
 complete-shell:update() (
-  [[ $# -gt 0 ]] ||
-    die "usage: complete-shell update <compdef-name>..."
+  action=update
 
-  for comp; do
-    [[ $comp =~ ^[-a-zA-Z0-9_]+$ ]] ||
-      error "Invalid compdef name '$comp'."
-
-    [[ -e "$COMPLETE_SHELL_COMP/$comp.comp" ]] ||
-      error "The compdef '$comp' is not installed."
-
-    if [[ -h "$COMPLETE_SHELL_COMP/$comp.comp" ]]; then
-      is_update=true
-      complete-shell:install "$comp"
-
-    else
-      echo "Can't update '$comp'. It has no upstream."
-    fi
-  done
+  complete-shell:install "$@"
 )
 
 complete-shell:add() (
@@ -460,13 +450,14 @@ BASH_CONFIG_TEXT="\
 search-index() {
   local term=$1 callback=$2
 
+  is_tag=false
+  [[ $term == @* ]] && is_tag=true
+
   local found=false line name desc tags=() from type branch path cmds=()
 
   match() {
     if [[ -z $term ]] ||
-       [[ $term == @* &&
-          " ${tags[*]} " == *\ $term\ *
-       ]] ||
+       [[ $term == @* && " ${tags[*]} " == *\ $term\ * ]] ||
        [[ $name =~ $term ]]
     then
       found=true
@@ -525,15 +516,23 @@ install-entry() {
   fi
 
   if [[ -d $repo_path ]]; then
-    if [[ $is_update ]]; then
+    if [[ $action == update ]]; then
+      if [[ ! -h "$COMPLETE_SHELL_COMP/$name.comp" ]]; then
+        echo "Can't update '$name'. It has no upstream."
+      fi
       (
         cd "$repo_path" || return
         git pull --ff-only &> /dev/null
         say "Pulled $from"
       )
     else
+      if $is_tag; then
+        echo "'$name' is already installed."
+        return
+      fi
+
       error "'$name' is already installed." \
-          "Try 'complete-shell update $name'"
+            "Try 'complete-shell update $name'"
     fi
 
   else
@@ -552,7 +551,7 @@ install-entry() {
       ( cd "$COMPLETE_SHELL_COMP" && ln -fs "$bash_file" . ) || die
     fi
     complete-shell:add "$file_path"
-    if [[ ${is_update-} ]]; then
+    if [[ $action == update ]]; then
       say "Updated $file_path"
     else
       say "Added $file_path"
