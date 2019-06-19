@@ -6,7 +6,7 @@ V @v = O -v --verbose   ..More information in output
 V @q = O -q --quiet     ..Quieter output
 
 # Name of command to define completion for:
-N complete-shell
+N complete-shell v0.0.5 ..'Modern tab completion everywhere'
   # Command level options:
   O -h --help           ..Show the command summary
   O --version           ..Show the complete-shell version
