@@ -1,3 +1,11 @@
+## v0.2.11   2019/06/19
+- Allow completions from anywhere in command
+- Add fzf support for big selections
+- Allow `COMPLETE_SHELL_ROOT` to be ~/.complete-shell
+- Improve install/update code
+- Add new compdefs to search-index
+- Fix off-by-one bug in options
+
 ## v0.2.10   2019/02/06
 - Fix assorted Mac bugs
 

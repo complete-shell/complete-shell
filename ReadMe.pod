@@ -219,7 +219,7 @@ Disable CompleteShell tab completion altogether.
 
 An umbrella option to always use the most modern CompleteShell settings.
 Effectively set these to true: C<single_tab>, C<no_prompt>,
-C<show_descriptions>, C<show_usage>, C<show_hints>.
+C<show_descriptions>, C<show_usage>, C<show_hints>, C<use_fzf>.
 
 =item C<single_tab>
 
@@ -251,6 +251,11 @@ be useful. Use this to enable them.
 Recent Bash versions allow for completions to be sorted horizontally, which is
 usually better. We turn that on for you if available. Use this to keep the
 Bash default.
+
+=item C<use_fzf>
+
+Use fzf selector (if installed) when appropriate. Avoids the terrible Bash
+completion pager for large result sets.
 
 =back
 

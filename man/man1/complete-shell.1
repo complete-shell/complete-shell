@@ -250,7 +250,7 @@ Disable CompleteShell tab completion altogether.
 .ie n .IP """modern_settings""" 4
 .el .IP "\f(CWmodern_settings\fR" 4
 .IX Item "modern_settings"
-An umbrella option to always use the most modern CompleteShell settings. Effectively set these to true: \f(CW\*(C`single_tab\*(C'\fR, \f(CW\*(C`no_prompt\*(C'\fR, \f(CW\*(C`show_descriptions\*(C'\fR, \f(CW\*(C`show_usage\*(C'\fR, \f(CW\*(C`show_hints\*(C'\fR.
+An umbrella option to always use the most modern CompleteShell settings. Effectively set these to true: \f(CW\*(C`single_tab\*(C'\fR, \f(CW\*(C`no_prompt\*(C'\fR, \f(CW\*(C`show_descriptions\*(C'\fR, \f(CW\*(C`show_usage\*(C'\fR, \f(CW\*(C`show_hints\*(C'\fR, \f(CW\*(C`use_fzf\*(C'\fR.
 .ie n .IP """single_tab""" 4
 .el .IP "\f(CWsingle_tab\fR" 4
 .IX Item "single_tab"
@@ -275,6 +275,10 @@ CompleteShell can give you hints about certain things when it thinks they'll be 
 .el .IP "\f(CWno_horizontal\fR" 4
 .IX Item "no_horizontal"
 Recent Bash versions allow for completions to be sorted horizontally, which is usually better. We turn that on for you if available. Use this to keep the Bash default.
+.ie n .IP """use_fzf""" 4
+.el .IP "\f(CWuse_fzf\fR" 4
+.IX Item "use_fzf"
+Use fzf selector (if installed) when appropriate. Avoids the terrible Bash completion pager for large result sets.
 .SH "Environment Variables"
 .IX Header "Environment Variables"
 CompleteShell has environment variables that you can use to customize various things. Usually you don't need to worry about these at all.
