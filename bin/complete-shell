@@ -329,6 +329,7 @@ _$alias() {
   local base=\${COMPLETE_SHELL_BASE:-\$HOME/.complete-shell}
   [[ \$base == "\$COMPLETE_SHELL_ROOT" ]] && base+=/base
 
+  # shellcheck disable=1090
   source "\$base/bash-completion/completions/$cmd.bash"
 
   "_$cmd"
